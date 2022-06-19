@@ -3,7 +3,7 @@
 
 #include "Adafruit_MPR121.h"
 #include "USB.h"
-#define IR_ACTIVATION 40    // 红外触发阈值(0-99)
+#define IR_ACTIVATION 80    // 红外触发阈值(0-99)
 #define DebugSerialDevice Serial    // 调试串口
 
 #endif

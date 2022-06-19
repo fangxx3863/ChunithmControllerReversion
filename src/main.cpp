@@ -7,7 +7,7 @@ void setup() {
     DebugSerialDevice.setTimeout(0);
     KeySetup();
     sliderSetup();
-    Wire.setClock(800000);
+    Wire.setClock(3400000);
     USB.productName("ChunithmKEYS");
     USB.manufacturerName("fangxx3863");
     USB.serialNumber("2333");
