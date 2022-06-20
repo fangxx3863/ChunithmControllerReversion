@@ -11,11 +11,11 @@ Adafruit_MPR121 capB = Adafruit_MPR121();
 Adafruit_MPR121 capC = Adafruit_MPR121();
 Adafruit_MPR121 capD = Adafruit_MPR121();
 
+int IR_Activation = IR_ACTIVATION;
 static int16_t ir_activation[6];
 static int8_t IR_TX_PIN[6] = {33, 34, 35, 36, 37, 38};
 static int8_t IR_RX_PIN[6] = {A10, A11, A12, A13, A14, A15};
 const u_int8_t IR_KEYS[6] = {'0', '1', '2', '3', '4', '5'};
-#define IR_COND pinval > (8192 * IR_ACTIVATION / 100)
 
 void KeySetup() {  // 键盘与AIR初始化
     for (int i = 0; i < 6; i++) {
@@ -27,6 +27,22 @@ void KeySetup() {  // 键盘与AIR初始化
     Keyboard.begin();
 }
 
+void IRAutoSetup() {    // 检测环境红外强度设置触发阈值
+    int eco = 0;
+    for (int i = 0; i < 6; i++) {
+        pinMode(IR_RX_PIN[i], INPUT);
+    }
+    for (int i = 0; i < 6; i++) {
+        eco = eco + analogRead(IR_RX_PIN[i]);
+    }
+    eco = eco / 6;
+    if (eco < 2500) {
+        IR_Activation = IR_SUN_ACTIVATION;
+    }else {
+        IR_Activation = IR_NIGHT_ACTIVATION;
+    }
+}
+
 void KeyCheck() {  // AIR检查
     static uint32_t ir_state = 0;
     for (int i = 0; i < 6; i++) {
@@ -36,7 +52,7 @@ void KeyCheck() {  // AIR检查
         // DebugSerialDevice.print(IR_RX_PIN[i]);
         // DebugSerialDevice.print("  IRVAL: ");
         // DebugSerialDevice.println(pinval);
-        if (IR_COND) {
+        if (pinval > (8192 * IR_Activation / 100)) {
             if (!(ir_state & (1 << i))) {
                 // DebugSerialDevice.print("IR: ");
                 // DebugSerialDevice.println(i);
@@ -164,4 +180,23 @@ void KeyTest2() {  // 用以测试原始键盘报文
         report.keycode[i] = 0x00;
     }
     Keyboard.hidRaw(report);
+}
+
+void IRTest() {
+    static int loop = 0;
+    loop++;
+    if (loop > 400) {
+        DebugSerialDevice.print("IR1: ");
+        DebugSerialDevice.print(analogRead(A10));
+        DebugSerialDevice.print("  IR2: ");
+        DebugSerialDevice.print(analogRead(A11));
+        DebugSerialDevice.print("  IR3: ");
+        DebugSerialDevice.print(analogRead(A12));
+        DebugSerialDevice.print("  IR4: ");
+        DebugSerialDevice.print(analogRead(A13));
+        DebugSerialDevice.print("  IR5: ");
+        DebugSerialDevice.print(analogRead(A14));
+        DebugSerialDevice.print("  IR6: ");
+        DebugSerialDevice.println(analogRead(A15));
+    }
 }

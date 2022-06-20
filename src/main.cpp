@@ -7,6 +7,7 @@ void setup() {
     DebugSerialDevice.setTimeout(0);
     KeySetup();
     sliderSetup();
+    IRAutoSetup();
     Wire.setClock(3400000);
     USB.productName("ChunithmKEYS");
     USB.manufacturerName("fangxx3863");
@@ -16,7 +17,8 @@ void setup() {
 
 void loop() {
     KeyCheck();
+    sliderScan();
     // KeyTest();
     // KeyTest2();
-    sliderScan();
+    // IRTest();
 }

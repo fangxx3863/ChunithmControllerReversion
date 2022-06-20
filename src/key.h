@@ -3,5 +3,7 @@ void KeySetup();
 void KeyCheck();
 void KeyTest();
 void KeyTest2();
+void IRTest();
+void IRAutoSetup();
 void sliderSetup();
 void sliderScan();
