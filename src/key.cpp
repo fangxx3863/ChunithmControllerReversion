@@ -15,7 +15,10 @@ int IR_Activation = IR_ACTIVATION;
 static int16_t ir_activation[6];
 static int8_t IR_TX_PIN[6] = {33, 34, 35, 36, 37, 38};
 static int8_t IR_RX_PIN[6] = {A10, A11, A12, A13, A14, A15};
-const u_int8_t IR_KEYS[6] = {'0', '1', '2', '3', '4', '5'};
+uint8_t KEYS[38] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+                    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+                    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ',', '.', '0',
+                    '1', '2', '3', '4', '5'};
 
 void KeySetup() {  // 键盘与AIR初始化
     for (int i = 0; i < 6; i++) {
@@ -56,12 +59,12 @@ void KeyCheck() {  // AIR检查
             if (!(ir_state & (1 << i))) {
                 // DebugSerialDevice.print("IR: ");
                 // DebugSerialDevice.println(i);
-                Keyboard.addKey(IR_KEYS[i]);
+                Keyboard.addKey(KEYS[i+32]);
                 ir_state |= 1 << i;
             }
         } else {
             if (ir_state & (1 << i)) {
-                Keyboard.delKey(IR_KEYS[i]);
+                Keyboard.delKey(KEYS[i+32]);
                 ir_state &= ~(1 << i);
             }
         }
@@ -69,9 +72,15 @@ void KeyCheck() {  // AIR检查
     }
 }
 
-uint8_t KEYS[32] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-                    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ',', '.'};
+
+bool setKeys(uint8_t keys[]) {
+    memcpy(KEYS, keys, 38);
+    return 1;
+}
+
+uint8_t* getKeys() {
+    return KEYS;
+}
 
 void sliderSetup() {  // 触摸初始化
     while (!(capA.begin(0x5A) & capB.begin(0x5B) & capC.begin(0x5C) &

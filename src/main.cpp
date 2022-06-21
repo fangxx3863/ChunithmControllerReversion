@@ -1,13 +1,16 @@
 #include <Arduino.h>
 #include "config.h"
 #include "key.h"
+#include "serial.h"
 
 void setup() {
     DebugSerialDevice.begin(115200);
     DebugSerialDevice.setTimeout(0);
     KeySetup();
+    communicationSerialSetup();
     sliderSetup();
     IRAutoSetup();
+    readEEPROM();
     Wire.setClock(3400000);
     USB.productName("ChunithmKEYS");
     USB.manufacturerName("fangxx3863");
@@ -18,6 +21,7 @@ void setup() {
 void loop() {
     KeyCheck();
     sliderScan();
+    setKeysMap();
     // KeyTest();
     // KeyTest2();
     // IRTest();
