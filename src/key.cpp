@@ -31,18 +31,18 @@ void KeySetup() {  // 键盘与AIR初始化
 }
 
 void IRAutoSetup() {    // 检测环境红外强度设置触发阈值
-    int eco = 0;
     for (int i = 0; i < 6; i++) {
         pinMode(IR_RX_PIN[i], INPUT);
     }
-    for (int i = 0; i < 6; i++) {
-        eco = eco + analogRead(IR_RX_PIN[i]);
-    }
-    eco = eco / 6;
-    if (eco < 2500) {
+    if (analogRead(A15) > 2000 && analogRead(A15) < 8000) {
         IR_Activation = IR_SUN_ACTIVATION;
+        DebugSerialDevice.println("IR-->SUN_MODE");
+    }else if (analogRead(A15) > 0 && analogRead(A15) < 2000) {
+        IR_Activation = IR_NUN_ACTIVATION;
+        DebugSerialDevice.println("IR-->NUN_MODE");
     }else {
         IR_Activation = IR_NIGHT_ACTIVATION;
+        DebugSerialDevice.println("IR-->NIGHT_MODE");
     }
 }
 
@@ -55,7 +55,7 @@ void KeyCheck() {  // AIR检查
         // DebugSerialDevice.print(IR_RX_PIN[i]);
         // DebugSerialDevice.print("  IRVAL: ");
         // DebugSerialDevice.println(pinval);
-        if (pinval > (8192 * IR_Activation / 100)) {
+        if (pinval > (IR_Activation)) {
             if (!(ir_state & (1 << i))) {
                 // DebugSerialDevice.print("IR: ");
                 // DebugSerialDevice.println(i);

@@ -41,7 +41,7 @@ bool readEEPROM() {
     uint8_t readKEYS[38];
     for (int i=0; i<38; i++) {
         readKEYS[i] = EEPROM.read(i);
-        DebugSerialDevice.println(EEPROM.read(i));
+        // DebugSerialDevice.println(EEPROM.read(i));
     }
     setKeys(readKEYS);
     return 1;
