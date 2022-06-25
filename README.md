@@ -66,11 +66,11 @@
 #### 步骤  
 1. 焊接TX板
 2. 请只焊接如图的元件,注意LED不要接反(长腿正)  
- 
 
 3. 焊接RX板
 4. 请只焊接如图的元件,注意LED不要接反(长腿对应丝印二极管正极)  
 
+5. 焊接8P排线
 
 |TX板|RX板|
 |--|--|
@@ -81,8 +81,19 @@
 |--|--|
 | ![IMG_20220625_210555](https://user-images.githubusercontent.com/48589001/175774754-1382e351-0c62-4e46-b387-3400e5231a4f.jpg) | ![IMG_20220625_210607](https://user-images.githubusercontent.com/48589001/175774760-62d6334d-a372-413a-8dae-9a8e012174cc.jpg) |
 
+### 组装  
+将所有物品至于基板上(基板可以是亚克力,ABS,~~或者日历硬纸皮~~)
+#### 步骤  
+1. 从右到左依次把0x5A-0x5D的主控板拼接  
+2. 用M2铜柱加上M2螺丝固定
+3. 连接TX,RX排线
+4. 切割基板并把主控板粘在基板上
+5. 用角码固定天键
 
-
+### 程序  
+克隆本项目并用PIO打开  
+连接SERIAL的USB接口,点击上传图标,等待上传完成即可  
+键盘映射请参考[此目录下的SegaTools](https://github.com/fangxx3863/ChunithmControllerReversion/tree/main/extra)  
 
 # 配套上位机改键软件 
 https://github.com/fangxx3863/ChunithmControllerReversionHost
