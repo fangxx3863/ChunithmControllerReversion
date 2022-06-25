@@ -95,6 +95,12 @@
 连接SERIAL的USB接口,点击上传图标,等待上传完成即可  
 键盘映射请参考[此目录下的SegaTools](https://github.com/fangxx3863/ChunithmControllerReversion/tree/main/extra)  
 
+### 后记  
+Mpr121已调参至可以使用手套触摸  
+祝各位早日AJ!!!  
+![IMG_20220619_225755](https://user-images.githubusercontent.com/48589001/175777178-d6c7cfee-5464-4fc4-aea8-1edbff9c0c26.jpg)
+
+
 # 配套上位机改键软件 
 https://github.com/fangxx3863/ChunithmControllerReversionHost
 ![image](https://user-images.githubusercontent.com/48589001/174819279-b126e2a4-ecf0-4bac-9959-3cc2d2d13013.png)
