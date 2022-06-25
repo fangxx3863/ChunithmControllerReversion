@@ -24,8 +24,17 @@
 3. 砂纸(辅助打磨天键PCB)
 4. 打样主控PCB
 5. 打样天键PCB
-6. [此目录下的原件](https://github.com/fangxx3863/ChunithmControllerReversion/tree/main/extra)
+6. [此目录下的元件](https://github.com/fangxx3863/ChunithmControllerReversion/tree/main/extra)
 
+## 开始制作  
+### 焊接  
+#### 最右边主控板
+1. 将所有焊点涂上焊膏,注意量不要太多  
+2. 使用立创专业版的辅助焊接工具对照3D预览将除了TypeC,按钮,拨码开关,Mpr121以外的的元件全部用镊子小心放置于焊盘上  
+3. `注意`印有JP丝印的元件位请用0R电阻,最右边的主控板请将0x5A用0R填充  
+4. 将PCB移至加热台加热,待焊锡融化后用镊子将未归位的元件推齐  
+5. 用镊子把Mpr121位置的多余焊膏去掉,对准位置小心的将Mpr121放置于焊盘上,待自动归位后稍微向下压一压  
+6. 完成后将电路板放于地板加速冷却
 
 # 配套上位机改键软件 
 https://github.com/fangxx3863/ChunithmControllerReversionHost
