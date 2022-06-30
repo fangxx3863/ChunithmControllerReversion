@@ -19,8 +19,12 @@ void setup() {
 }
 
 void loop() {
-    KeyCheck();
-    sliderScan();
+    if (isIROpen()) {
+        KeyCheck();
+    }
+    if (isSliderOpen()) {
+        sliderScan();
+    }
     setKeysMap();
     // KeyTest();
     // KeyTest2();

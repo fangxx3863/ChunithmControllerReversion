@@ -15,10 +15,10 @@ int IR_Activation = IR_ACTIVATION;
 static int16_t ir_activation[6];
 static int8_t IR_TX_PIN[6] = {33, 34, 35, 36, 37, 38};
 static int8_t IR_RX_PIN[6] = {A10, A11, A12, A13, A14, A15};
-uint8_t KEYS[38] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-                    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-                    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ',', '.', '0',
-                    '1', '2', '3', '4', '5'};
+uint8_t KEYS[40] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+                    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                    'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                    ',', '.', '0', '1', '2', '3', '4', '5', 'y', 'y'};
 
 void KeySetup() {  // 键盘与AIR初始化
     for (int i = 0; i < 6; i++) {
@@ -30,20 +30,34 @@ void KeySetup() {  // 键盘与AIR初始化
     Keyboard.begin();
 }
 
-void IRAutoSetup() {    // 检测环境红外强度设置触发阈值
+void IRAutoSetup() {  // 检测环境红外强度设置触发阈值
     for (int i = 0; i < 6; i++) {
         pinMode(IR_RX_PIN[i], INPUT);
     }
     if (analogRead(A15) > 2000 && analogRead(A15) < 8000) {
         IR_Activation = IR_SUN_ACTIVATION;
         DebugSerialDevice.println("IR-->SUN_MODE");
-    }else if (analogRead(A15) > 0 && analogRead(A15) < 2000) {
+    } else if (analogRead(A15) > 0 && analogRead(A15) < 2000) {
         IR_Activation = IR_NUN_ACTIVATION;
         DebugSerialDevice.println("IR-->NUN_MODE");
-    }else {
+    } else {
         IR_Activation = IR_NIGHT_ACTIVATION;
         DebugSerialDevice.println("IR-->NIGHT_MODE");
     }
+}
+
+bool isIROpen() {
+    if (KEYS[38] == 'y') {
+        return 1;
+    }
+    return 0;
+}
+
+bool isSliderOpen() {
+    if (KEYS[39] == 'y') {
+        return 1;
+    }
+    return 0;
 }
 
 void KeyCheck() {  // AIR检查
@@ -59,12 +73,14 @@ void KeyCheck() {  // AIR检查
             if (!(ir_state & (1 << i))) {
                 // DebugSerialDevice.print("IR: ");
                 // DebugSerialDevice.println(i);
-                Keyboard.addKey(KEYS[i+32]);
+                Keyboard.addKey(KEYS[i + 32]);
+                Keyboard.sendKey();
                 ir_state |= 1 << i;
             }
         } else {
             if (ir_state & (1 << i)) {
-                Keyboard.delKey(KEYS[i+32]);
+                Keyboard.delKey(KEYS[i + 32]);
+                Keyboard.sendKey();
                 ir_state &= ~(1 << i);
             }
         }
@@ -72,32 +88,29 @@ void KeyCheck() {  // AIR检查
     }
 }
 
-
 bool setKeys(uint8_t keys[]) {
-    memcpy(KEYS, keys, 38);
+    memcpy(KEYS, keys, 40);
     return 1;
 }
 
-uint8_t* getKeys() {
-    return KEYS;
-}
+uint8_t* getKeys() { return KEYS; }
 
 void sliderSetup() {  // 触摸初始化
     while (!(capA.begin(0x5A) & capB.begin(0x5B) & capC.begin(0x5C) &
              capD.begin(0x5D))) {
         delay(500);
     }
-    capA.setThreshholds(2, 1);
-    capB.setThreshholds(2, 1);
-    capC.setThreshholds(2, 1);
-    capD.setThreshholds(2, 1);
+    capA.setThresholds(3, 1);
+    capB.setThresholds(3, 1);
+    capC.setThresholds(3, 1);
+    capD.setThresholds(3, 1);
 }
 
+
+uint32_t last_status;
 void sliderScan() {  // 触摸扫描
-    static uint32_t last_status = 0;
     uint32_t sensors;
     uint8_t capa_data, capb_data, capc_data, capd_data;
-
     capa_data = capA.touched();
     capb_data = capB.touched();
     capc_data = capC.touched();
@@ -123,18 +136,28 @@ void sliderScan() {  // 触摸扫描
     sensors |= (u_int32_t)((capd_data & 0b1100) >> 2) << 28;
     sensors |= (u_int32_t)((capd_data & 0b11) >> 0) << 30;
 
-    static bool st = false;
-    for (int i = 0; i < 32; i++) {
-        if (sensors & (1 << i)) {
-            st = true;
-            Keyboard.addKey(KEYS[i]);
-            // DebugSerialDevice.print("Press: ");
-            // DebugSerialDevice.println(i + 1);
-        } else {
-            Keyboard.delKey(KEYS[i]);
+    if (last_status != sensors) {
+        for (int i=0; i<32; i++) {
+            if (sensors & (1<<i)) {
+                if (!(last_status & (1<<i))) {
+                    Keyboard.addKey(KEYS[i]);
+                    // DebugSerialDevice.print("PressKEY: ");
+                    // DebugSerialDevice.println(i + 1);
+                }
+            }else if (!(sensors & (1<<i))) {
+                // DebugSerialDevice.println(last_status, BIN);
+                if (last_status & (1<<i)) {
+                    // DebugSerialDevice.print("ReleaseKEY: ");
+                    // DebugSerialDevice.println(i + 1);
+                    Keyboard.delKey(KEYS[i]);
+                    
+                }
+            }
+            Keyboard.sendKey();
         }
+        
     }
-    if (st) Keyboard.sendKey();
+    last_status = sensors;
 }
 
 void KeyTest() {  // 用以测试键盘按下

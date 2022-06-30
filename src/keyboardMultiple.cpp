@@ -300,13 +300,24 @@ size_t USBHIDKeyboard::press(uint8_t k)
     return pressRaw(k);
 }
 
+// #include <Arduino.h>
 size_t USBHIDKeyboard::addKey(uint8_t k) {
     k = _asciimap[k];
-    for (int i=2; i<60; i++) {
+    for (int i=0; i<60; i++) {
         if (keys_all.keycode[i] == k) {
             return 1;
-        }else if (keys_all.keycode[i] == 0x00) {
+        }
+    }
+    for (int i=0; i<60; i++) {
+        if (keys_all.keycode[i] == 0x00) {
             keys_all.keycode[i] = k;
+            /*
+            Serial.println("KEYCODE_P_ALL:");
+            for (int i=0; i<10; i++) {
+                Serial.print(keys_all.keycode[i]);
+            }
+            Serial.println();
+            */
             return 1;
         }
     }
@@ -315,12 +326,18 @@ size_t USBHIDKeyboard::addKey(uint8_t k) {
 
 size_t USBHIDKeyboard::delKey(uint8_t k) {
     k = _asciimap[k];
-    for (int i=2; i<60; i++) {
-        if (0 != k && keys_all.keycode[i] == k) {
+    for (int i=0; i<60; i++) {
+        if (k && keys_all.keycode[i] == k) {
             keys_all.keycode[i] = 0x00;
+            /*
+            Serial.println("KEYCODE_R_ALL:");
+            for (int i=0; i<10; i++) {
+                Serial.print(keys_all.keycode[i]);
+            }
+            Serial.println();
+            */
             return 1;
         }
-        
     }
     return 0;
 }

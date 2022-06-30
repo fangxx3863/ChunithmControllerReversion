@@ -6,10 +6,10 @@
 
 USBCDC CommunicationSerial;
 
-uint8_t defaultKEYS[38] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+uint8_t defaultKEYS[40] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
                            'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
                            's', 't', 'u', 'v', 'w', 'x', 'y', 'z', ',', '.', '0',
-                           '1', '2', '3', '4', '5'};
+                           '1', '2', '3', '4', '5', 'y', 'y'};
 
 void communicationSerialSetup() {
     EEPROM.begin(64);
@@ -20,7 +20,7 @@ void communicationSerialSetup() {
         EEPROM.commit();
     }
     if (EEPROM.read(1) == 0x00) {
-        for (int i=0; i<38; i++) {
+        for (int i=0; i<40; i++) {
             EEPROM.write(i, defaultKEYS[i]);
         }
         EEPROM.commit();
@@ -30,7 +30,7 @@ void communicationSerialSetup() {
 
 bool writeEEPROM() {
     uint8_t* writeKEYS = getKeys();
-    for (int i=0; i<38; i++) {
+    for (int i=0; i<40; i++) {
         EEPROM.write(i, writeKEYS[i]);
     }
     EEPROM.commit();
@@ -38,12 +38,18 @@ bool writeEEPROM() {
 }
 
 bool readEEPROM() {
-    uint8_t readKEYS[38];
-    for (int i=0; i<38; i++) {
+    uint8_t readKEYS[40];
+    for (int i=0; i<40; i++) {
         readKEYS[i] = EEPROM.read(i);
         // DebugSerialDevice.println(EEPROM.read(i));
     }
     setKeys(readKEYS);
+    DebugSerialDevice.print("KEYS: ");
+    for (int i=0; i<40; i++) {
+        DebugSerialDevice.print(readKEYS[i]);
+        DebugSerialDevice.print(" ");
+    }
+    DebugSerialDevice.println();
     return 1;
 }
 
@@ -54,10 +60,10 @@ bool setKeysMap() {
         if (cmd == "SetKeys") {
             CommunicationSerial.println("KeySetReady");
             cmd = "";
-            uint8_t _setKeys[38];
+            uint8_t _setKeys[40];
             while (true) {
                 if (CommunicationSerial.available()) {
-                    for (int i=0; i<38; i++) {
+                    for (int i=0; i<40; i++) {
                         _setKeys[i] = CommunicationSerial.read();
                     }
                     setKeys(_setKeys);
@@ -70,7 +76,7 @@ bool setKeysMap() {
         
         if (cmd == "GetKeys") {
             uint8_t* getKEYS = getKeys();
-            for (int i=0; i<38; i++) {
+            for (int i=0; i<40; i++) {
                 CommunicationSerial.write(getKEYS[i]);
                 CommunicationSerial.print("/");
             }

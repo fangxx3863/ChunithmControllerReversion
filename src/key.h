@@ -1,5 +1,7 @@
 #include "config.h"
 void KeySetup();
+bool isIROpen();
+bool isSliderOpen();
 void KeyCheck();
 void KeyTest();
 void KeyTest2();
