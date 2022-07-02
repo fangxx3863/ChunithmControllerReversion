@@ -92,8 +92,8 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   writeRegister(MPR121_FDLT, 0x00);
 
   writeRegister(MPR121_DEBOUNCE, 0);
-  writeRegister(MPR121_CONFIG1, 0x37); // default, 16uA charge current
-  writeRegister(MPR121_CONFIG2, 0x00); // 0.5uS encoding, 1ms period
+  writeRegister(MPR121_CONFIG1, 0x39); // default, 16uA charge current
+  writeRegister(MPR121_CONFIG2, 0x03); // 0.5uS encoding, 1ms period
 
 #ifdef AUTOCONFIG
   writeRegister(MPR121_AUTOCONFIG0, 0x0B);
@@ -106,7 +106,7 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
 
   // enable X electrodes and start MPR121
   byte ECR_SETTING =
-      B10000000 + 12; // 5 bits for baseline tracking & proximity disabled + X
+      B10000000 + 8; // 5 bits for baseline tracking & proximity disabled + X
                       // amount of electrodes running (12)
   writeRegister(MPR121_ECR, ECR_SETTING); // start with above ECR setting
 

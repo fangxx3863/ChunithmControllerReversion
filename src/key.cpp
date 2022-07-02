@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <USBHID.h>
+
 #include <map>
+
 #include "USB.h"
 #include "config.h"
 #include "keyboardMultiple.h"
@@ -100,15 +102,14 @@ void sliderSetup() {  // 触摸初始化
              capD.begin(0x5D))) {
         delay(500);
     }
-    capA.setThresholds(2, 1);
-    capB.setThresholds(2, 1);
-    capC.setThresholds(2, 1);
-    capD.setThresholds(2, 1);
+    capA.setThresholds(64, 60);
+    capB.setThresholds(64, 60);
+    capC.setThresholds(64, 60);
+    capD.setThresholds(64, 60);
 }
 
-
 uint32_t last_status;
-std::map<int, uint8_t> PKEYS;
+std::map<uint8_t, int> PKEYS;
 void sliderScan() {  // 触摸扫描
     uint32_t sensors;
     uint8_t capa_data, capb_data, capc_data, capd_data;
@@ -137,21 +138,21 @@ void sliderScan() {  // 触摸扫描
     sensors |= (u_int32_t)((capd_data & 0b1100) >> 2) << 28;
     sensors |= (u_int32_t)((capd_data & 0b11) >> 0) << 30;
 
-    for (int i=0; i<32; i++) {
-        if (sensors & (1<<i)) {
-            if (!(last_status & (1<<i))) {
+    for (int i = 0; i < 32; i++) {
+        if (sensors & (1 << i)) {
+            if (!(last_status & (1 << i))) {
                 Keyboard.addKey(KEYS[i]);
                 Keyboard.sendKey();
                 PKEYS[KEYS[i]]++;
-                // DebugSerialDevice.print("PressKEY: ");
-                // DebugSerialDevice.println(i + 1);
+                DebugSerialDevice.print("PressKEY: ");
+                DebugSerialDevice.println(i + 1);
             }
-        }else if (!(sensors & (1<<i))) {
+        } else {
             // DebugSerialDevice.println(last_status, BIN);
-            if (last_status & (1<<i)) {
+            if (last_status & (1 << i)) {
                 PKEYS[KEYS[i]]--;
-                // DebugSerialDevice.print("ReleaseKEY: ");
-                // DebugSerialDevice.println(i + 1);
+                DebugSerialDevice.print("ReleaseKEY: ");
+                DebugSerialDevice.println(i + 1);
                 if (!(PKEYS[KEYS[i]])) {
                     Keyboard.delKey(KEYS[i]);
                     Keyboard.sendKey();
