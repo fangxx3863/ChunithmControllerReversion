@@ -102,10 +102,10 @@ void sliderSetup() {  // 触摸初始化
              capD.begin(0x5D))) {
         delay(500);
     }
-    capA.setThresholds(70, 68);
-    capB.setThresholds(70, 68);
-    capC.setThresholds(70, 68);
-    capD.setThresholds(70, 68);
+    capA.setThresholds(50, 50);
+    capB.setThresholds(55, 50);
+    capC.setThresholds(55, 50);
+    capD.setThresholds(55, 50);
 }
 
 uint32_t last_status;
@@ -138,29 +138,31 @@ void sliderScan() {  // 触摸扫描
     sensors |= (u_int32_t)((capd_data & 0b1100) >> 2) << 28;
     sensors |= (u_int32_t)((capd_data & 0b11) >> 0) << 30;
 
-    for (int i = 0; i < 32; i++) {
-        if (sensors & (1 << i)) {
-            if (!(last_status & (1 << i))) {
-                Keyboard.addKey(KEYS[i]);
-                Keyboard.sendKey();
-                PKEYS[KEYS[i]]++;
-                // DebugSerialDevice.print("PressKEY: ");
-                // DebugSerialDevice.println(i + 1);
-            }
-        } else {
-            // DebugSerialDevice.println(last_status, BIN);
-            if (last_status & (1 << i)) {
-                PKEYS[KEYS[i]]--;
-                // DebugSerialDevice.print("ReleaseKEY: ");
-                // DebugSerialDevice.println(i + 1);
-                if (!(PKEYS[KEYS[i]])) {
-                    Keyboard.delKey(KEYS[i]);
+    if (last_status != sensors) {
+        for (int i = 0; i < 32; i++) {
+            if (sensors & (1 << i)) {
+                if (!(last_status & (1 << i))) {
+                    Keyboard.addKey(KEYS[i]);
                     Keyboard.sendKey();
+                    PKEYS[KEYS[i]]++;
+                    // DebugSerialDevice.print("PressKEY: ");
+                    // DebugSerialDevice.println(i + 1);
+                }
+            } else {
+                // DebugSerialDevice.println(last_status, BIN);
+                if (last_status & (1 << i)) {
+                    PKEYS[KEYS[i]]--;
+                    // DebugSerialDevice.print("ReleaseKEY: ");
+                    // DebugSerialDevice.println(i + 1);
+                    if (!(PKEYS[KEYS[i]])) {
+                        Keyboard.delKey(KEYS[i]);
+                        Keyboard.sendKey();
+                    }
                 }
             }
         }
+        last_status = sensors;
     }
-    last_status = sensors;
     // Keyboard.sendKey();
 }
 

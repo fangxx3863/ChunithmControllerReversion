@@ -77,13 +77,14 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
     return false;
 
   setThresholds(touchThreshold, releaseThreshold);
+  
   writeRegister(MPR121_MHDR, 0x01);
   writeRegister(MPR121_NHDR, 0x01);
-  writeRegister(MPR121_NCLR, 0x1E);
+  writeRegister(MPR121_NCLR, 0x0E);
   writeRegister(MPR121_FDLR, 0x00);
 
-  writeRegister(MPR121_MHDF, 0x08);
-  writeRegister(MPR121_NHDF, 0x08);
+  writeRegister(MPR121_MHDF, 0x01);
+  writeRegister(MPR121_NHDF, 0x05);
   writeRegister(MPR121_NCLF, 0x01);
   writeRegister(MPR121_FDLF, 0x00);
 
@@ -92,8 +93,8 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   writeRegister(MPR121_FDLT, 0x00);
 
   writeRegister(MPR121_DEBOUNCE, 0);
-  writeRegister(MPR121_CONFIG1, 0x37); // default, 16uA charge current
-  writeRegister(MPR121_CONFIG2, 0x03); // 0.5uS encoding, 1ms period
+  writeRegister(MPR121_CONFIG1, 0x22); // default, 16uA charge current
+  writeRegister(MPR121_CONFIG2, 0x00); // 0.5uS encoding, 1ms period
 
 #ifdef AUTOCONFIG
   writeRegister(MPR121_AUTOCONFIG0, 0x0B);
