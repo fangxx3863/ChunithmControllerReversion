@@ -102,10 +102,10 @@ void sliderSetup() {  // 触摸初始化
              capD.begin(0x5D))) {
         delay(500);
     }
-    capA.setThresholds(68, 68);
-    capB.setThresholds(68, 68);
-    capC.setThresholds(68, 68);
-    capD.setThresholds(68, 68);
+    capA.setThresholds(70, 68);
+    capB.setThresholds(70, 68);
+    capC.setThresholds(70, 68);
+    capD.setThresholds(70, 68);
 }
 
 uint32_t last_status;
@@ -161,7 +161,7 @@ void sliderScan() {  // 触摸扫描
         }
     }
     last_status = sensors;
-    Keyboard.sendKey();
+    // Keyboard.sendKey();
 }
 
 void KeyTest() {  // 用以测试键盘按下
