@@ -102,10 +102,10 @@ void sliderSetup() {  // 触摸初始化
              capD.begin(0x5D))) {
         delay(500);
     }
-    capA.setThresholds(64, 60);
-    capB.setThresholds(64, 60);
-    capC.setThresholds(64, 60);
-    capD.setThresholds(64, 60);
+    capA.setThresholds(68, 68);
+    capB.setThresholds(68, 68);
+    capC.setThresholds(68, 68);
+    capD.setThresholds(68, 68);
 }
 
 uint32_t last_status;
@@ -144,15 +144,15 @@ void sliderScan() {  // 触摸扫描
                 Keyboard.addKey(KEYS[i]);
                 Keyboard.sendKey();
                 PKEYS[KEYS[i]]++;
-                DebugSerialDevice.print("PressKEY: ");
-                DebugSerialDevice.println(i + 1);
+                // DebugSerialDevice.print("PressKEY: ");
+                // DebugSerialDevice.println(i + 1);
             }
         } else {
             // DebugSerialDevice.println(last_status, BIN);
             if (last_status & (1 << i)) {
                 PKEYS[KEYS[i]]--;
-                DebugSerialDevice.print("ReleaseKEY: ");
-                DebugSerialDevice.println(i + 1);
+                // DebugSerialDevice.print("ReleaseKEY: ");
+                // DebugSerialDevice.println(i + 1);
                 if (!(PKEYS[KEYS[i]])) {
                     Keyboard.delKey(KEYS[i]);
                     Keyboard.sendKey();
