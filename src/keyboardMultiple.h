@@ -58,7 +58,7 @@ ESP_EVENT_DECLARE_BASE(ARDUINO_USB_HID_KEYBOARD_EVENTS);
       HID_REPORT_COUNT ( 1                                       ) ,\
       HID_REPORT_SIZE  ( 3                                       ) ,\
       HID_OUTPUT       ( HID_CONSTANT                            ) ,\
-    /* 6-byte Keycodes */ \
+    /* 60-byte Keycodes */ \
     HID_USAGE_PAGE ( HID_USAGE_PAGE_KEYBOARD )                     ,\
       HID_USAGE_MIN    ( 0                                   )     ,\
       HID_USAGE_MAX_N  ( 255, 2                              )     ,\
