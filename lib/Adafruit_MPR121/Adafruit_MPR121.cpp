@@ -97,7 +97,7 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   writeRegister(MPR121_CONFIG1, MPR121_CHARGE_CURRENT); // default, 16uA charge current
   writeRegister(MPR121_CONFIG2, MPR121_ENCODING_PERIOD); // 0.5uS encoding, 1ms period
 
-#ifdef AUTOCONFIG
+#if AUTOCONFIG
   writeRegister(MPR121_AUTOCONFIG0, 0x0B);
 
   // correct values for Vdd = 3.3V
