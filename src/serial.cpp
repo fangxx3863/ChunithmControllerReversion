@@ -50,6 +50,7 @@ bool readEEPROM() {
         DebugSerialDevice.print(" ");
     }
     DebugSerialDevice.println();
+    DebugSerialDevice.println("[INFO] Read EEPROM OK");
     return 1;
 }
 

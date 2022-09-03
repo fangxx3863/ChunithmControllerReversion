@@ -27,6 +27,7 @@
  */
 
 #include "Adafruit_MPR121.h"
+#include "../../src/config.h"
 
 // uncomment to use autoconfig !
 //#define AUTOCONFIG // use autoconfig (Yes it works pretty well!)
@@ -93,14 +94,14 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   writeRegister(MPR121_FDLT, 0x00);
 
   writeRegister(MPR121_DEBOUNCE, 0);
-  writeRegister(MPR121_CONFIG1, 0x22); // default, 16uA charge current
-  writeRegister(MPR121_CONFIG2, 0x00); // 0.5uS encoding, 1ms period
+  writeRegister(MPR121_CONFIG1, MPR121_CHARGE_CURRENT); // default, 16uA charge current
+  writeRegister(MPR121_CONFIG2, MPR121_ENCODING_PERIOD); // 0.5uS encoding, 1ms period
 
 #ifdef AUTOCONFIG
   writeRegister(MPR121_AUTOCONFIG0, 0x0B);
 
   // correct values for Vdd = 3.3V
-  writeRegister(MPR121_UPLIMIT, 200);     // ((Vdd - 0.7)/Vdd) * 256
+  writeRegister(MPR121_UPLIMIT, 200);     // ((Vdd - 0.7)/Vdd) * 256 // 200
   writeRegister(MPR121_TARGETLIMIT, 180); // UPLIMIT * 0.9
   writeRegister(MPR121_LOWLIMIT, 130);    // UPLIMIT * 0.65
 #endif

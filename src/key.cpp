@@ -1,8 +1,6 @@
 #include <Arduino.h>
 #include <USBHID.h>
-
 #include <map>
-
 #include "USB.h"
 #include "config.h"
 #include "keyboardMultiple.h"
@@ -30,6 +28,7 @@ void KeySetup() {  // 键盘与AIR初始化
         pinMode(IR_RX_PIN[i], INPUT);
     }
     Keyboard.begin();
+    DebugSerialDevice.println("[INFO] Key Setup OK");
 }
 
 void IRAutoSetup() {  // 检测环境红外强度设置触发阈值
@@ -46,6 +45,7 @@ void IRAutoSetup() {  // 检测环境红外强度设置触发阈值
         IR_Activation = IR_NIGHT_ACTIVATION;
         DebugSerialDevice.println("IR-->NIGHT_MODE");
     }
+    DebugSerialDevice.println("[INFO] IR Auto Setup OK");
 }
 
 bool isIROpen() {
@@ -102,10 +102,11 @@ void sliderSetup() {  // 触摸初始化
              capD.begin(0x5D))) {
         delay(500);
     }
-    capA.setThresholds(50, 50);
-    capB.setThresholds(55, 50);
-    capC.setThresholds(55, 50);
-    capD.setThresholds(55, 50);
+    capA.setThresholds(PressThresholds, ReleaseThresholds);
+    capB.setThresholds(PressThresholds, ReleaseThresholds);
+    capC.setThresholds(PressThresholds, ReleaseThresholds);
+    capD.setThresholds(PressThresholds, ReleaseThresholds);
+    DebugSerialDevice.println("[INFO] Slider Setup OK");
 }
 
 uint32_t last_status;
