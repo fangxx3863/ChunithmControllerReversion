@@ -37,13 +37,13 @@ void IRAutoSetup() {  // 检测环境红外强度设置触发阈值
     }
     if (analogRead(A15) > 2000 && analogRead(A15) < 8000) {
         IR_Activation = IR_SUN_ACTIVATION;
-        DebugSerialDevice.println("IR-->SUN_MODE");
+        DebugSerialDevice.println("[INFO] IR-->SUN_MODE");
     } else if (analogRead(A15) > 0 && analogRead(A15) < 2000) {
         IR_Activation = IR_NUN_ACTIVATION;
-        DebugSerialDevice.println("IR-->NUN_MODE");
+        DebugSerialDevice.println("[INFO] IR-->NUN_MODE");
     } else {
         IR_Activation = IR_NIGHT_ACTIVATION;
-        DebugSerialDevice.println("IR-->NIGHT_MODE");
+        DebugSerialDevice.println("[INFO] IR-->NIGHT_MODE");
     }
     DebugSerialDevice.println("[INFO] IR Auto Setup OK");
 }
@@ -98,14 +98,48 @@ bool setKeys(uint8_t keys[]) {
 uint8_t* getKeys() { return KEYS; }
 
 void sliderSetup() {  // 触摸初始化
-    while (!(capA.begin(0x5A) & capB.begin(0x5B) & capC.begin(0x5C) &
-             capD.begin(0x5D))) {
-        delay(500);
+    DebugSerialDevice.println("[INFO] Adress 0x5A Slider Setup");
+    while (!(capA.testBegin(0x5A))) {
+        delay(100);
+        DebugSerialDevice.println("[ERROR] Adress 0x5A Slider Setup Failed, Retrying");
     }
-    capA.setThresholds(PressThresholds, ReleaseThresholds);
-    capB.setThresholds(PressThresholds, ReleaseThresholds);
-    capC.setThresholds(PressThresholds, ReleaseThresholds);
-    capD.setThresholds(PressThresholds, ReleaseThresholds);
+    DebugSerialDevice.println("[INFO] Adress 0x5B Slider Setup");
+    while (!(capB.testBegin(0x5B))) {
+        delay(100);
+        DebugSerialDevice.println("[ERROR] Adress 0x5B Slider Setup Failed, Retrying");
+    }
+    DebugSerialDevice.println("[INFO] Adress 0x5C Slider Setup");
+    while (!(capC.testBegin(0x5C))) {
+        delay(100);
+        DebugSerialDevice.println("[ERROR] Adress 0x5C Slider Setup Failed, Retrying");
+    }
+    DebugSerialDevice.println("[INFO] Adress 0x5D Slider Setup");
+    while (!(capD.testBegin(0x5D))) {
+        delay(100);
+        DebugSerialDevice.println("[ERROR] Adress 0x5D Slider Setup Failed, Retrying");
+    }
+
+    // 切换模式
+    if ((uint8_t)capA.touched() != 0 || (uint8_t)capB.touched() != 0 ||
+        (uint8_t)capC.touched() != 0 || (uint8_t)capD.touched() != 0 ||
+        (uint8_t)capA.touched() != 0 || (uint8_t)capB.touched() != 0 ||
+        (uint8_t)capC.touched() != 0 || (uint8_t)capD.touched() != 0) {
+        while (!(capA.begin(0x5A, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) & 
+                 capB.begin(0x5B, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) & 
+                 capC.begin(0x5C, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) &
+                 capD.begin(0x5D, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD))) {
+            delay(100);
+        }
+        DebugSerialDevice.println("[INFO] Slider Run In Gloves Mode");
+    } else {
+        while (!(capA.begin(0x5A, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) & 
+                 capB.begin(0x5B, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) & 
+                 capC.begin(0x5C, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) &
+                 capD.begin(0x5D, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD))) {
+            delay(100);
+        }
+        DebugSerialDevice.println("[INFO] Slider Run In Hands Mode");
+    }
     DebugSerialDevice.println("[INFO] Slider Setup OK");
 }
 

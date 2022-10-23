@@ -44,7 +44,7 @@ bool readEEPROM() {
         // DebugSerialDevice.println(EEPROM.read(i));
     }
     setKeys(readKEYS);
-    DebugSerialDevice.print("KEYS: ");
+    DebugSerialDevice.print("[INFO] Read KEYS: ");
     for (int i=0; i<40; i++) {
         DebugSerialDevice.print(readKEYS[i]);
         DebugSerialDevice.print(" ");

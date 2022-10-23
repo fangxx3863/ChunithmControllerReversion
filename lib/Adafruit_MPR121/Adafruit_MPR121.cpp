@@ -37,20 +37,7 @@
  */
 Adafruit_MPR121::Adafruit_MPR121() {}
 
-/*!
- *  @brief    Begin an MPR121 object on a given I2C bus. This function resets
- *            the device and writes the default settings.
- *  @param    i2caddr
- *            the i2c address the device can be found on. Defaults to 0x5A.
- *  @param    *theWire
- *            Wire object
- *  @param    touchThreshold
- *            touch detection threshold value
- *  @param    releaseThreshold
- *            release detection threshold value
- *  @returns  true on success, false otherwise
- */
-bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
+bool Adafruit_MPR121::testBegin(uint8_t i2caddr, TwoWire *theWire,
                             uint8_t touchThreshold, uint8_t releaseThreshold) {
 
   if (i2c_dev) {
@@ -93,9 +80,86 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   writeRegister(MPR121_NCLT, 0x00);
   writeRegister(MPR121_FDLT, 0x00);
 
-  writeRegister(MPR121_DEBOUNCE, 0);
-  writeRegister(MPR121_CONFIG1, MPR121_CHARGE_CURRENT); // default, 16uA charge current
-  writeRegister(MPR121_CONFIG2, MPR121_ENCODING_PERIOD); // 0.5uS encoding, 1ms period
+  writeRegister(MPR121_DEBOUNCE, 0x00);
+  writeRegister(MPR121_CONFIG1, 0x29); // default, 16uA charge current
+  writeRegister(MPR121_CONFIG2, 0x40); // 0.5uS encoding, 1ms period
+
+  writeRegister(MPR121_AUTOCONFIG0, 0x0B);
+
+  // correct values for Vdd = 3.3V
+  writeRegister(MPR121_UPLIMIT, 200);     // ((Vdd - 0.7)/Vdd) * 256 // 200
+  writeRegister(MPR121_TARGETLIMIT, 180); // UPLIMIT * 0.9
+  writeRegister(MPR121_LOWLIMIT, 130);    // UPLIMIT * 0.65
+
+  // enable X electrodes and start MPR121
+  byte ECR_SETTING =
+      B10000000 + 8; // 5 bits for baseline tracking & proximity disabled + X
+                      // amount of electrodes running (12)
+  writeRegister(MPR121_ECR, ECR_SETTING); // start with above ECR setting
+
+  return true;
+}
+
+/*!
+ *  @brief    Begin an MPR121 object on a given I2C bus. This function resets
+ *            the device and writes the default settings.
+ *  @param    i2caddr
+ *            the i2c address the device can be found on. Defaults to 0x5A.
+ *  @param    *theWire
+ *            Wire object
+ *  @param    touchThreshold
+ *            touch detection threshold value
+ *  @param    releaseThreshold
+ *            release detection threshold value
+ *  @returns  true on success, false otherwise
+ */
+bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
+                            uint8_t touchThreshold, uint8_t releaseThreshold, 
+                            uint8_t cfg1, uint8_t cfg2) {
+
+  if (i2c_dev) {
+    delete i2c_dev;
+  }
+  i2c_dev = new Adafruit_I2CDevice(i2caddr, theWire);
+
+  if (!i2c_dev->begin()) {
+    return false;
+  }
+
+  // soft reset
+  writeRegister(MPR121_SOFTRESET, 0x63);
+  delay(1);
+  for (uint8_t i = 0; i < 0x7F; i++) {
+    //  Serial.print("$"); Serial.print(i, HEX);
+    //  Serial.print(": 0x"); Serial.println(readRegister8(i));
+  }
+
+  writeRegister(MPR121_ECR, 0x0);
+
+  uint8_t c = readRegister8(MPR121_CONFIG2);
+
+  if (c != 0x24)
+    return false;
+
+  setThresholds(touchThreshold, releaseThreshold);
+  
+  writeRegister(MPR121_MHDR, 0x01);
+  writeRegister(MPR121_NHDR, 0x01);
+  writeRegister(MPR121_NCLR, 0x0E);
+  writeRegister(MPR121_FDLR, 0x00);
+
+  writeRegister(MPR121_MHDF, 0x01);
+  writeRegister(MPR121_NHDF, 0x05);
+  writeRegister(MPR121_NCLF, 0x01);
+  writeRegister(MPR121_FDLF, 0x00);
+
+  writeRegister(MPR121_NHDT, 0x00);
+  writeRegister(MPR121_NCLT, 0x00);
+  writeRegister(MPR121_FDLT, 0x00);
+
+  writeRegister(MPR121_DEBOUNCE, 0x01);
+  writeRegister(MPR121_CONFIG1, cfg1); // default, 16uA charge current
+  writeRegister(MPR121_CONFIG2, cfg2); // 0.5uS encoding, 1ms period
 
 #if AUTOCONFIG
   writeRegister(MPR121_AUTOCONFIG0, 0x0B);
