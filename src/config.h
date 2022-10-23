@@ -12,16 +12,16 @@
 
 // 开机时按下任意触摸键进入手套模式,反之进入空手模式
 // 空手模式
-#define PressThresholds 20              // 按下触发阈值
-#define ReleaseThresholds 18            // 释放触发阈值
-#define MPR121_CHARGE_CURRENT 0x10      // 极板充电电流,设置越高灵敏度越高
-#define MPR121_ENCODING_PERIOD 0x40     // 极板编码时间,具体设置见MPR121手册
+#define PressThresholds 17             // 按下触发阈值
+#define ReleaseThresholds 17           // 释放触发阈值
+#define MPR121_CHARGE_CURRENT 0xF0      // 极板充电电流,设置越高灵敏度越高
+#define MPR121_ENCODING_PERIOD 0x00     // 极板编码时间,具体设置见MPR121手册
 
 // 手套模式
-#define GlovesPressThresholds 10        // 手套模式按下触发阈值
-#define GlovesReleaseThresholds 10      // 手套模式释放触发阈值
-#define GlovesMPR121_CHARGE_CURRENT 0xDE     // 手套模式极板充电电流,设置越高灵敏度越高
-#define GlovesMPR121_ENCODING_PERIOD 0x40    // 手套模式极板编码时间,具体设置见MPR121手册
+#define GlovesPressThresholds 2        // 手套模式按下触发阈值
+#define GlovesReleaseThresholds 2      // 手套模式释放触发阈值
+#define GlovesMPR121_CHARGE_CURRENT 0xFF     // 手套模式极板充电电流,设置越高灵敏度越高
+#define GlovesMPR121_ENCODING_PERIOD 0x00    // 手套模式极板编码时间,具体设置见MPR121手册
 
 #define AUTOCONFIG 0                    // 是否开启MPR121自动参数设置,0开启,1关闭
 

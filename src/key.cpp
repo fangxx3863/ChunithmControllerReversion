@@ -100,22 +100,22 @@ uint8_t* getKeys() { return KEYS; }
 void sliderSetup() {  // 触摸初始化
     DebugSerialDevice.println("[INFO] Adress 0x5A Slider Setup");
     while (!(capA.testBegin(0x5A))) {
-        delay(100);
+        delay(300);
         DebugSerialDevice.println("[ERROR] Adress 0x5A Slider Setup Failed, Retrying");
     }
     DebugSerialDevice.println("[INFO] Adress 0x5B Slider Setup");
     while (!(capB.testBegin(0x5B))) {
-        delay(100);
+        delay(300);
         DebugSerialDevice.println("[ERROR] Adress 0x5B Slider Setup Failed, Retrying");
     }
     DebugSerialDevice.println("[INFO] Adress 0x5C Slider Setup");
     while (!(capC.testBegin(0x5C))) {
-        delay(100);
+        delay(300);
         DebugSerialDevice.println("[ERROR] Adress 0x5C Slider Setup Failed, Retrying");
     }
     DebugSerialDevice.println("[INFO] Adress 0x5D Slider Setup");
     while (!(capD.testBegin(0x5D))) {
-        delay(100);
+        delay(300);
         DebugSerialDevice.println("[ERROR] Adress 0x5D Slider Setup Failed, Retrying");
     }
 
@@ -128,7 +128,7 @@ void sliderSetup() {  // 触摸初始化
                  capB.begin(0x5B, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) & 
                  capC.begin(0x5C, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) &
                  capD.begin(0x5D, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD))) {
-            delay(100);
+            delay(300);
         }
         DebugSerialDevice.println("[INFO] Slider Run In Gloves Mode");
     } else {
@@ -136,7 +136,7 @@ void sliderSetup() {  // 触摸初始化
                  capB.begin(0x5B, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) & 
                  capC.begin(0x5C, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) &
                  capD.begin(0x5D, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD))) {
-            delay(100);
+            delay(300);
         }
         DebugSerialDevice.println("[INFO] Slider Run In Hands Mode");
     }
