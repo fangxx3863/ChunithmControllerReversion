@@ -62,8 +62,11 @@ bool isSliderOpen() {
     return 0;
 }
 
-void KeyCheck() {  // AIR检查
+/*
+void KeyCheck() {  // AIR检查旧代码
     static uint32_t ir_state = 0;
+    static uint32_t interval = 0;
+    interval++;
     for (int i = 0; i < 6; i++) {
         digitalWrite(IR_TX_PIN[i], HIGH);
         int pinval = analogRead(IR_RX_PIN[i]);
@@ -87,6 +90,113 @@ void KeyCheck() {  // AIR检查
             }
         }
         digitalWrite(IR_TX_PIN[i], LOW);
+    }
+}
+*/
+
+void KeyCheck() {  // AIR检查
+    static int ir_status = 0;
+    static uint32_t interval = 0;
+    switch (ir_status) {
+        case 0:
+            digitalWrite(IR_TX_PIN[0], HIGH);
+            ir_status = 1;
+            break;
+        case 1:
+            ir_status = 2;
+            interval = 0;
+            if (analogRead(IR_RX_PIN[0]) > (IR_Activation)) {
+                Keyboard.addKey(KEYS[0 + 32]);
+                Keyboard.sendKey();
+            } else {
+                Keyboard.delKey(KEYS[0 + 32]);
+                Keyboard.sendKey();
+            }
+            digitalWrite(IR_TX_PIN[0], LOW);
+            break;
+        case 2:
+            digitalWrite(IR_TX_PIN[1], HIGH);
+            ir_status = 3;
+            break;
+        case 3:
+            ir_status = 4;
+            interval = 0;
+            if (analogRead(IR_RX_PIN[1]) > (IR_Activation)) {
+                Keyboard.addKey(KEYS[1 + 32]);
+                Keyboard.sendKey();
+            } else {
+                Keyboard.delKey(KEYS[1 + 32]);
+                Keyboard.sendKey();
+            }
+            digitalWrite(IR_TX_PIN[1], LOW);
+            break;
+        case 4:
+            digitalWrite(IR_TX_PIN[2], HIGH);
+            ir_status = 5;
+            break;
+        case 5:
+            ir_status = 6;
+            interval = 0;
+            if (analogRead(IR_RX_PIN[2]) > (IR_Activation)) {
+                Keyboard.addKey(KEYS[2 + 32]);
+                Keyboard.sendKey();
+            } else {
+                Keyboard.delKey(KEYS[2 + 32]);
+                Keyboard.sendKey();
+            }
+            digitalWrite(IR_TX_PIN[2], LOW);
+            break;
+        case 6:
+            digitalWrite(IR_TX_PIN[3], HIGH);
+            ir_status = 7;
+            break;
+        case 7:
+            ir_status = 8;
+            interval = 0;
+            if (analogRead(IR_RX_PIN[3]) > (IR_Activation)) {
+                Keyboard.addKey(KEYS[3 + 32]);
+                Keyboard.sendKey();
+            } else {
+                Keyboard.delKey(KEYS[3 + 32]);
+                Keyboard.sendKey();
+            }
+            digitalWrite(IR_TX_PIN[3], LOW);
+            break;
+        case 8:
+            digitalWrite(IR_TX_PIN[4], HIGH);
+            ir_status = 9;
+            break;
+        case 9:
+            ir_status = 10;
+            interval = 0;
+            if (analogRead(IR_RX_PIN[4]) > (IR_Activation)) {
+                Keyboard.addKey(KEYS[4 + 32]);
+                Keyboard.sendKey();
+            } else {
+                Keyboard.delKey(KEYS[4 + 32]);
+                Keyboard.sendKey();
+            }
+            digitalWrite(IR_TX_PIN[4], LOW);
+            break;
+        case 10:
+            digitalWrite(IR_TX_PIN[5], HIGH);
+            ir_status = 11;
+            break;
+        case 11:
+            ir_status = 0;
+            interval = 0;
+            if (analogRead(IR_RX_PIN[5]) > (IR_Activation)) {
+                Keyboard.addKey(KEYS[5 + 32]);
+                Keyboard.sendKey();
+            } else {
+                Keyboard.delKey(KEYS[5 + 32]);
+                Keyboard.sendKey();
+            }
+            digitalWrite(IR_TX_PIN[5], LOW);
+            break;
+
+        default:
+            break;
     }
 }
 
