@@ -2,6 +2,7 @@
 void KeySetup();
 bool isIROpen();
 bool isSliderOpen();
+int calTouch(int bl, int fd);
 void KeyCheck();
 void KeyTest();
 void KeyTest2();
@@ -10,4 +11,6 @@ bool setKeys(uint8_t keys[]);
 void IRTest();
 void IRAutoSetup();
 void sliderSetup();
+int mapRealKeys(int i);
 void sliderScan();
+void sliderRawScan();

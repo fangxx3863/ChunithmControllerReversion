@@ -23,7 +23,8 @@ void loop() {
         KeyCheck();
     }
     if (isSliderOpen()) {
-        sliderScan();
+        // sliderScan();        // 读MPR121处理的触摸值
+        sliderRawScan();        // 读MPR121原始值单片机处理
     }
     setKeysMap();
     // KeyTest();

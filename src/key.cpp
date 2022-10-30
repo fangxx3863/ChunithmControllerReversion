@@ -11,6 +11,10 @@ Adafruit_MPR121 capB = Adafruit_MPR121();
 Adafruit_MPR121 capC = Adafruit_MPR121();
 Adafruit_MPR121 capD = Adafruit_MPR121();
 
+uint32_t last_status;
+std::map<uint8_t, int> PKEYS;
+int FKEYS[32];
+
 int IR_Activation = IR_ACTIVATION;
 static int16_t ir_activation[6];
 static int8_t IR_TX_PIN[6] = {33, 34, 35, 36, 37, 38};
@@ -62,7 +66,12 @@ bool isSliderOpen() {
     return 0;
 }
 
-/*
+int calTouch(int bl, int fd) {  // 触摸数值计算
+  int cal = bl - fd;
+  return cal > 4 ? 8 * cal : (cal > 0 ? cal : 0) ;
+}
+
+
 void KeyCheck() {  // AIR检查旧代码
     static uint32_t ir_state = 0;
     static uint32_t interval = 0;
@@ -92,9 +101,10 @@ void KeyCheck() {  // AIR检查旧代码
         digitalWrite(IR_TX_PIN[i], LOW);
     }
 }
-*/
 
-void KeyCheck() {  // AIR检查
+
+/*
+void KeyCheck() {  // AIR检查新代码
     static int ir_status = 0;
     static uint32_t interval = 0;
     switch (ir_status) {
@@ -113,7 +123,6 @@ void KeyCheck() {  // AIR检查
                 Keyboard.sendKey();
             }
             digitalWrite(IR_TX_PIN[0], LOW);
-            break;
         case 2:
             digitalWrite(IR_TX_PIN[1], HIGH);
             ir_status = 3;
@@ -129,7 +138,6 @@ void KeyCheck() {  // AIR检查
                 Keyboard.sendKey();
             }
             digitalWrite(IR_TX_PIN[1], LOW);
-            break;
         case 4:
             digitalWrite(IR_TX_PIN[2], HIGH);
             ir_status = 5;
@@ -145,7 +153,6 @@ void KeyCheck() {  // AIR检查
                 Keyboard.sendKey();
             }
             digitalWrite(IR_TX_PIN[2], LOW);
-            break;
         case 6:
             digitalWrite(IR_TX_PIN[3], HIGH);
             ir_status = 7;
@@ -161,7 +168,6 @@ void KeyCheck() {  // AIR检查
                 Keyboard.sendKey();
             }
             digitalWrite(IR_TX_PIN[3], LOW);
-            break;
         case 8:
             digitalWrite(IR_TX_PIN[4], HIGH);
             ir_status = 9;
@@ -177,7 +183,6 @@ void KeyCheck() {  // AIR检查
                 Keyboard.sendKey();
             }
             digitalWrite(IR_TX_PIN[4], LOW);
-            break;
         case 10:
             digitalWrite(IR_TX_PIN[5], HIGH);
             ir_status = 11;
@@ -193,12 +198,12 @@ void KeyCheck() {  // AIR检查
                 Keyboard.sendKey();
             }
             digitalWrite(IR_TX_PIN[5], LOW);
-            break;
 
         default:
             break;
     }
 }
+*/
 
 bool setKeys(uint8_t keys[]) {
     memcpy(KEYS, keys, 40);
@@ -251,10 +256,13 @@ void sliderSetup() {  // 触摸初始化
         DebugSerialDevice.println("[INFO] Slider Run In Hands Mode");
     }
     DebugSerialDevice.println("[INFO] Slider Setup OK");
+
+    for (int i=0; i<255; i++) {
+        PKEYS[i] = 0;
+    }
 }
 
-uint32_t last_status;
-std::map<uint8_t, int> PKEYS;
+
 void sliderScan() {  // 触摸扫描
     uint32_t sensors;
     uint8_t capa_data, capb_data, capc_data, capd_data;
@@ -309,6 +317,87 @@ void sliderScan() {  // 触摸扫描
         last_status = sensors;
     }
     // Keyboard.sendKey();
+}
+
+int mapRealKeys(int i) {
+    if (i == 0) return 6;
+    if (i == 1) return 7;
+    if (i == 2) return 4;
+    if (i == 3) return 5;
+    if (i == 4) return 2;
+    if (i == 5) return 3;
+    if (i == 6) return 0;
+    if (i == 7) return 1;
+    return 0;
+}
+
+void sliderRawScan() {
+    int16_t bl, fl, cal;
+    for (int i=0; i<8; i++) {
+        bl = capA.baselineData(mapRealKeys(i));
+        fl = capA.filteredData(mapRealKeys(i));
+        cal = calTouch(bl, fl);
+        if (cal > SLIDER_THRESHOLDS) {
+            Keyboard.addKey(KEYS[i]);
+            Keyboard.sendKey();
+            FKEYS[i] = true;
+            PKEYS[KEYS[i]]++;
+        } else if (PKEYS[KEYS[i]] && FKEYS[i]) {
+            Keyboard.delKey(KEYS[i]);
+            Keyboard.sendKey();
+            FKEYS[i] = false;
+            PKEYS[KEYS[i]]--;
+        }
+    }
+    for (int i=0; i<8; i++) {
+        bl = capB.baselineData(mapRealKeys(i));
+        fl = capB.filteredData(mapRealKeys(i));
+        cal = calTouch(bl, fl);
+        if (cal > SLIDER_THRESHOLDS) {
+            Keyboard.addKey(KEYS[i+8]);
+            Keyboard.sendKey();
+            FKEYS[i+8] = true;
+            PKEYS[KEYS[i+8]]++;
+        } else if (PKEYS[KEYS[i+8]] && FKEYS[i+8]) {
+            Keyboard.delKey(KEYS[i+8]);
+            Keyboard.sendKey();
+            FKEYS[i+8] = false;
+            PKEYS[KEYS[i+8]]--;
+        }
+    }
+    for (int i=0; i<8; i++) {
+        bl = capC.baselineData(mapRealKeys(i));
+        fl = capC.filteredData(mapRealKeys(i));
+        cal = calTouch(bl, fl);
+        if (cal > SLIDER_THRESHOLDS) {
+            Keyboard.addKey(KEYS[i+16]);
+            Keyboard.sendKey();
+            FKEYS[i+16] = true;
+            PKEYS[KEYS[i+16]]++;
+        } else if (PKEYS[KEYS[i+16]] && FKEYS[i+16]) {
+            Keyboard.delKey(KEYS[i+16]);
+            Keyboard.sendKey();
+            FKEYS[i+16] = false;
+            PKEYS[KEYS[i+16]]--;
+        }
+    }
+    for (int i=0; i<8; i++) {
+        bl = capD.baselineData(mapRealKeys(i));
+        fl = capD.filteredData(mapRealKeys(i));
+        cal = calTouch(bl, fl);
+        if (cal > SLIDER_THRESHOLDS) {
+            Keyboard.addKey(KEYS[i+24]);
+            Keyboard.sendKey();
+            FKEYS[i+24] = true;
+            PKEYS[KEYS[i+24]]++;
+        } else if (PKEYS[KEYS[i+24]] && FKEYS[i+24]) {
+            Keyboard.delKey(KEYS[i+24]);
+            Keyboard.sendKey();
+            FKEYS[i+24] = false;
+            PKEYS[KEYS[i+24]]--;
+        }
+    }
+
 }
 
 void KeyTest() {  // 用以测试键盘按下
@@ -383,3 +472,4 @@ void IRTest() {
         DebugSerialDevice.println(analogRead(A15));
     }
 }
+
