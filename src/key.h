@@ -14,3 +14,4 @@ void sliderSetup();
 int mapRealKeys(int i);
 void sliderScan();
 void sliderRawScan();
+void ChangeMode(int i);

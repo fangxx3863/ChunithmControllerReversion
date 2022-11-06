@@ -19,10 +19,10 @@ int IR_Activation = IR_ACTIVATION;
 static int16_t ir_activation[6];
 static int8_t IR_TX_PIN[6] = {33, 34, 35, 36, 37, 38};
 static int8_t IR_RX_PIN[6] = {A10, A11, A12, A13, A14, A15};
-uint8_t KEYS[40] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+uint8_t KEYS[41] = {'6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
                     'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
                     'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                    ',', '.', '0', '1', '2', '3', '4', '5', 'y', 'y'};
+                    ',', '.', '0', '1', '2', '3', '4', '5', 'y', 'y', SLIDER_THRESHOLDS};
 
 void KeySetup() {  // 键盘与AIR初始化
     for (int i = 0; i < 6; i++) {
@@ -206,7 +206,7 @@ void KeyCheck() {  // AIR检查新代码
 */
 
 bool setKeys(uint8_t keys[]) {
-    memcpy(KEYS, keys, 40);
+    memcpy(KEYS, keys, 41);
     return 1;
 }
 
@@ -398,6 +398,25 @@ void sliderRawScan() {
         }
     }
 
+}
+
+void ChangeMode(int i) {    // 1手套 2空手
+    if (i == 1) {
+        while (!(capA.begin(0x5A, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) & 
+                 capB.begin(0x5B, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) & 
+                 capC.begin(0x5C, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD) &
+                 capD.begin(0x5D, &Wire, GlovesPressThresholds, GlovesReleaseThresholds, GlovesMPR121_CHARGE_CURRENT, GlovesMPR121_ENCODING_PERIOD))) {
+            delay(300);
+        }
+    }
+    if (i == 2) {
+        while (!(capA.begin(0x5A, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) & 
+                 capB.begin(0x5B, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) & 
+                 capC.begin(0x5C, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD) &
+                 capD.begin(0x5D, &Wire, PressThresholds, ReleaseThresholds, MPR121_CHARGE_CURRENT, MPR121_ENCODING_PERIOD))) {
+            delay(300);
+        }
+    }
 }
 
 void KeyTest() {  // 用以测试键盘按下
