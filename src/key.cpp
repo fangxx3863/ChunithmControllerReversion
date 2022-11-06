@@ -337,7 +337,7 @@ void sliderRawScan() {
         bl = capA.baselineData(mapRealKeys(i));
         fl = capA.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (cal > SLIDER_THRESHOLDS) {
+        if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i]);
             Keyboard.sendKey();
             FKEYS[i] = true;
@@ -353,7 +353,7 @@ void sliderRawScan() {
         bl = capB.baselineData(mapRealKeys(i));
         fl = capB.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (cal > SLIDER_THRESHOLDS) {
+        if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i+8]);
             Keyboard.sendKey();
             FKEYS[i+8] = true;
@@ -369,7 +369,7 @@ void sliderRawScan() {
         bl = capC.baselineData(mapRealKeys(i));
         fl = capC.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (cal > SLIDER_THRESHOLDS) {
+        if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i+16]);
             Keyboard.sendKey();
             FKEYS[i+16] = true;
@@ -385,7 +385,7 @@ void sliderRawScan() {
         bl = capD.baselineData(mapRealKeys(i));
         fl = capD.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (cal > SLIDER_THRESHOLDS) {
+        if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i+24]);
             Keyboard.sendKey();
             FKEYS[i+24] = true;
