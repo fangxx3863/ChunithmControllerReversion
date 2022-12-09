@@ -68,7 +68,8 @@ bool isSliderOpen() {
 
 int calTouch(int bl, int fd) {  // 触摸数值计算
   int cal = bl - fd;
-  return cal > 4 ? 8 * cal : (cal > 0 ? cal : 0) ;
+  // return cal > 4 ? 8 * cal : (cal > 0 ? cal : 0) ;
+  return cal;
 }
 
 
@@ -213,25 +214,25 @@ bool setKeys(uint8_t keys[]) {
 uint8_t* getKeys() { return KEYS; }
 
 void sliderSetup() {  // 触摸初始化
-    DebugSerialDevice.println("[INFO] Adress 0x5A Slider Setup");
+    DebugSerialDevice.println("[INFO] Address 0x5A Slider Setup");
     while (!(capA.testBegin(0x5A))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5A Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5A Slider Setup Failed, Retrying");
     }
-    DebugSerialDevice.println("[INFO] Adress 0x5B Slider Setup");
+    DebugSerialDevice.println("[INFO] Address 0x5B Slider Setup");
     while (!(capB.testBegin(0x5B))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5B Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5B Slider Setup Failed, Retrying");
     }
-    DebugSerialDevice.println("[INFO] Adress 0x5C Slider Setup");
+    DebugSerialDevice.println("[INFO] Address 0x5C Slider Setup");
     while (!(capC.testBegin(0x5C))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5C Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5C Slider Setup Failed, Retrying");
     }
-    DebugSerialDevice.println("[INFO] Adress 0x5D Slider Setup");
+    DebugSerialDevice.println("[INFO] Address 0x5D Slider Setup");
     while (!(capD.testBegin(0x5D))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5D Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5D Slider Setup Failed, Retrying");
     }
 
     // 切换模式
@@ -337,6 +338,11 @@ void sliderRawScan() {
         bl = capA.baselineData(mapRealKeys(i));
         fl = capA.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
+        if (i==0||i==2||i==4||i==6) cal += 20;
+
+        // DebugSerialDevice.print(cal);
+        // DebugSerialDevice.print("-");
+        
         if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i]);
             Keyboard.sendKey();
@@ -353,6 +359,11 @@ void sliderRawScan() {
         bl = capB.baselineData(mapRealKeys(i));
         fl = capB.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
+        if (i==0||i==2||i==4||i==6) cal += 20;
+
+        // DebugSerialDevice.print(cal);
+        // DebugSerialDevice.print("-");
+
         if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i+8]);
             Keyboard.sendKey();
@@ -369,6 +380,11 @@ void sliderRawScan() {
         bl = capC.baselineData(mapRealKeys(i));
         fl = capC.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
+        if (i==0||i==2||i==4||i==6) cal += 20;
+
+        // DebugSerialDevice.print(cal);
+        // DebugSerialDevice.print("-");
+
         if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i+16]);
             Keyboard.sendKey();
@@ -385,6 +401,11 @@ void sliderRawScan() {
         bl = capD.baselineData(mapRealKeys(i));
         fl = capD.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
+        if (i==0||i==2||i==4||i==6) cal += 20;
+
+        // DebugSerialDevice.print(cal);
+        // DebugSerialDevice.print("-");
+
         if (cal > KEYS[40]) {
             Keyboard.addKey(KEYS[i+24]);
             Keyboard.sendKey();
@@ -397,6 +418,7 @@ void sliderRawScan() {
             PKEYS[KEYS[i+24]]--;
         }
     }
+    DebugSerialDevice.println();
 
 }
 
