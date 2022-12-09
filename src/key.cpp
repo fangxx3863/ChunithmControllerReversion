@@ -213,25 +213,25 @@ bool setKeys(uint8_t keys[]) {
 uint8_t* getKeys() { return KEYS; }
 
 void sliderSetup() {  // 触摸初始化
-    DebugSerialDevice.println("[INFO] Adress 0x5A Slider Setup");
+    DebugSerialDevice.println("[INFO] Address 0x5A Slider Setup");
     while (!(capA.testBegin(0x5A))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5A Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5A Slider Setup Failed, Retrying");
     }
     DebugSerialDevice.println("[INFO] Adress 0x5B Slider Setup");
     while (!(capB.testBegin(0x5B))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5B Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5B Slider Setup Failed, Retrying");
     }
-    DebugSerialDevice.println("[INFO] Adress 0x5C Slider Setup");
+    DebugSerialDevice.println("[INFO] Address 0x5C Slider Setup");
     while (!(capC.testBegin(0x5C))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5C Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5C Slider Setup Failed, Retrying");
     }
     DebugSerialDevice.println("[INFO] Adress 0x5D Slider Setup");
     while (!(capD.testBegin(0x5D))) {
         delay(300);
-        DebugSerialDevice.println("[ERROR] Adress 0x5D Slider Setup Failed, Retrying");
+        DebugSerialDevice.println("[ERROR] Address 0x5D Slider Setup Failed, Retrying");
     }
 
     // 切换模式
