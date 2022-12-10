@@ -24,7 +24,7 @@
 #define GlovesPressThresholds 1        // 手套模式按下触发阈值
 #define GlovesReleaseThresholds 1      // 手套模式释放触发阈值
 #define GlovesMPR121_CHARGE_CURRENT 0x3F     // 手套模式极板充电电流,设置越高灵敏度越高
-#define GlovesMPR121_ENCODING_PERIOD 0x50    // 手套模式极板编码时间,具体设置见MPR121手册
+#define GlovesMPR121_ENCODING_PERIOD 0x20    // 手套模式极板编码时间,具体设置见MPR121手册
 
 #define AUTOCONFIG 0                    // 是否开启MPR121自动参数设置,0开启,1关闭
 

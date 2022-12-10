@@ -152,7 +152,7 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   // 下降
   writeRegister(MPR121_MHDF, 0x2F);
   writeRegister(MPR121_NHDF, 0x2F);
-  writeRegister(MPR121_NCLF, 0xFF);
+  writeRegister(MPR121_NCLF, 0x3F);
   writeRegister(MPR121_FDLF, 0x00);
 
   // 点击
