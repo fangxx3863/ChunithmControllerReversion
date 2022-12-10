@@ -30,5 +30,5 @@ void loop() {
     setKeysMap();
     // KeyTest();
     // KeyTest2();
-    // IRTest();
+    IRTest();
 }

@@ -499,18 +499,14 @@ void IRTest() {
     static int loop = 0;
     loop++;
     if (loop > 400) {
-        DebugSerialDevice.print("IR1: ");
-        DebugSerialDevice.print(analogRead(A10));
-        DebugSerialDevice.print("  IR2: ");
-        DebugSerialDevice.print(analogRead(A11));
-        DebugSerialDevice.print("  IR3: ");
-        DebugSerialDevice.print(analogRead(A12));
-        DebugSerialDevice.print("  IR4: ");
-        DebugSerialDevice.print(analogRead(A13));
-        DebugSerialDevice.print("  IR5: ");
-        DebugSerialDevice.print(analogRead(A14));
-        DebugSerialDevice.print("  IR6: ");
-        DebugSerialDevice.println(analogRead(A15));
+        for (int i = 0; i < 6; i++) {
+            digitalWrite(IR_TX_PIN[i], HIGH);
+            int pinval = analogRead(IR_RX_PIN[i]);
+            DebugSerialDevice.print(pinval);
+            DebugSerialDevice.print("-");
+            digitalWrite(IR_TX_PIN[i], LOW);
+        }
+        DebugSerialDevice.println();
     }
 }
 
