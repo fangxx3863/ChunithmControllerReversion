@@ -418,7 +418,7 @@ void sliderRawScan() {
             PKEYS[KEYS[i+24]]--;
         }
     }
-    DebugSerialDevice.println();
+    // DebugSerialDevice.println();
 
 }
 
