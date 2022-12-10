@@ -37,6 +37,15 @@ bool writeEEPROM() {
     return 1;
 }
 
+bool eraseEEPROM() {
+    EEPROM.begin(64);
+    for (int i=0; i<64; i++) {
+        EEPROM.write(i, 0);
+    }
+    EEPROM.commit();
+    return 1;
+}
+
 bool readEEPROM() {
     uint8_t readKEYS[41];
     for (int i=0; i<41; i++) {

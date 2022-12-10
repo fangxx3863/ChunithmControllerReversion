@@ -6,6 +6,7 @@
 void setup() {
     DebugSerialDevice.begin(115200);
     DebugSerialDevice.setTimeout(0);
+    // eraseEEPROM();
     communicationSerialSetup();
     KeySetup();
     sliderSetup();
