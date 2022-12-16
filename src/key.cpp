@@ -338,12 +338,13 @@ void sliderRawScan() {
         bl = capA.baselineData(mapRealKeys(i));
         fl = capA.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (i==0||i==2||i==4||i==6) cal += 20;
 
-        // DebugSerialDevice.print(cal);
-        // DebugSerialDevice.print("-");
-        
-        if (cal > KEYS[40]) {
+        #if SLIDERDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
+
+        if (cal > (KEYS[40]+20)) {
             Keyboard.addKey(KEYS[i]);
             Keyboard.sendKey();
             FKEYS[i] = true;
@@ -359,12 +360,13 @@ void sliderRawScan() {
         bl = capB.baselineData(mapRealKeys(i));
         fl = capB.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (i==0||i==2||i==4||i==6) cal += 20;
 
-        // DebugSerialDevice.print(cal);
-        // DebugSerialDevice.print("-");
+        #if SLIDERDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
 
-        if (cal > KEYS[40]) {
+        if (cal > (KEYS[40]+20)) {
             Keyboard.addKey(KEYS[i+8]);
             Keyboard.sendKey();
             FKEYS[i+8] = true;
@@ -380,12 +382,13 @@ void sliderRawScan() {
         bl = capC.baselineData(mapRealKeys(i));
         fl = capC.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (i==0||i==2||i==4||i==6) cal += 20;
 
-        // DebugSerialDevice.print(cal);
-        // DebugSerialDevice.print("-");
+        #if SLIDERDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
 
-        if (cal > KEYS[40]) {
+        if (cal > (KEYS[40]+20)) {
             Keyboard.addKey(KEYS[i+16]);
             Keyboard.sendKey();
             FKEYS[i+16] = true;
@@ -401,12 +404,13 @@ void sliderRawScan() {
         bl = capD.baselineData(mapRealKeys(i));
         fl = capD.filteredData(mapRealKeys(i));
         cal = calTouch(bl, fl);
-        if (i==0||i==2||i==4||i==6) cal += 20;
 
-        // DebugSerialDevice.print(cal);
-        // DebugSerialDevice.print("-");
+        #if SLIDERDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
 
-        if (cal > KEYS[40]) {
+        if (cal > (KEYS[40]+20)) {
             Keyboard.addKey(KEYS[i+24]);
             Keyboard.sendKey();
             FKEYS[i+24] = true;
@@ -418,7 +422,9 @@ void sliderRawScan() {
             PKEYS[KEYS[i+24]]--;
         }
     }
-    // DebugSerialDevice.println();
+    #if SLIDERDEBUG
+    DebugSerialDevice.println();
+    #endif
 
 }
 

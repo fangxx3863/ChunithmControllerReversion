@@ -145,15 +145,15 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   
   // 上升
   writeRegister(MPR121_MHDR, 0x01);
-  writeRegister(MPR121_NHDR, 0x01);
-  writeRegister(MPR121_NCLR, 0x00);
+  writeRegister(MPR121_NHDR, 0x02);
+  writeRegister(MPR121_NCLR, 0x01);
   writeRegister(MPR121_FDLR, 0x00);
 
   // 下降
-  writeRegister(MPR121_MHDF, 0x2F);
-  writeRegister(MPR121_NHDF, 0x2F);
+  writeRegister(MPR121_MHDF, 0x3F);
+  writeRegister(MPR121_NHDF, 0x3F);
   writeRegister(MPR121_NCLF, 0x3F);
-  writeRegister(MPR121_FDLF, 0x00);
+  writeRegister(MPR121_FDLF, 0x06);
 
   // 点击
   writeRegister(MPR121_NHDT, 0x00);
@@ -165,12 +165,13 @@ bool Adafruit_MPR121::begin(uint8_t i2caddr, TwoWire *theWire,
   writeRegister(MPR121_CONFIG2, cfg2); // 0.5uS encoding, 1ms period
 
 #if AUTOCONFIG
-  writeRegister(MPR121_AUTOCONFIG0, 0x0B);
+  writeRegister(MPR121_AUTOCONFIG0, 0x1B);
+  writeRegister(MPR121_AUTOCONFIG1, 0x00);
 
   // correct values for Vdd = 3.3V
-  writeRegister(MPR121_UPLIMIT, 200);     // ((Vdd - 0.7)/Vdd) * 256 // 200
-  writeRegister(MPR121_TARGETLIMIT, 180); // UPLIMIT * 0.9
-  writeRegister(MPR121_LOWLIMIT, 130);    // UPLIMIT * 0.65
+  writeRegister(MPR121_UPLIMIT, 202);     // ((Vdd - 0.7)/Vdd) * 256 // 200
+  writeRegister(MPR121_TARGETLIMIT, 181); // UPLIMIT * 0.9
+  writeRegister(MPR121_LOWLIMIT, 131);    // UPLIMIT * 0.65
 #endif
 
   // enable X electrodes and start MPR121
