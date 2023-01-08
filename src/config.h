@@ -8,7 +8,7 @@
 #define IR_NUN_ACTIVATION 400           // 中午红外触发阈值(0-8191)
 #define IR_NIGHT_ACTIVATION 7000        // 夜晚红外触发阈值(0-8191)
 
-#define SLIDER_THRESHOLDS 190            // 默认触摸触发阈值
+#define SLIDER_THRESHOLDS 45            // 默认触摸触发阈值
 
 #define DebugSerialDevice Serial        // 调试串口
 
