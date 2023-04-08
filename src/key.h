@@ -13,5 +13,6 @@ void IRAutoSetup();
 void sliderSetup();
 int mapRealKeys(int i);
 void sliderScan();
-void sliderRawScan();
+void sliderKalmanScan();
+void sliderScanUpDown();
 void ChangeMode(int i);

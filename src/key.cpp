@@ -4,6 +4,7 @@
 #include "USB.h"
 #include "config.h"
 #include "keyboardMultiple.h"
+#include <SimpleKalmanFilter.h>
 
 USBHIDKeyboard Keyboard;
 Adafruit_MPR121 capA = Adafruit_MPR121();
@@ -103,109 +104,6 @@ void KeyCheck() {  // AIR检查旧代码
     }
 }
 
-
-/*
-void KeyCheck() {  // AIR检查新代码
-    static int ir_status = 0;
-    static uint32_t interval = 0;
-    switch (ir_status) {
-        case 0:
-            digitalWrite(IR_TX_PIN[0], HIGH);
-            ir_status = 1;
-            break;
-        case 1:
-            ir_status = 2;
-            interval = 0;
-            if (analogRead(IR_RX_PIN[0]) > (IR_Activation)) {
-                Keyboard.addKey(KEYS[0 + 32]);
-                Keyboard.sendKey();
-            } else {
-                Keyboard.delKey(KEYS[0 + 32]);
-                Keyboard.sendKey();
-            }
-            digitalWrite(IR_TX_PIN[0], LOW);
-        case 2:
-            digitalWrite(IR_TX_PIN[1], HIGH);
-            ir_status = 3;
-            break;
-        case 3:
-            ir_status = 4;
-            interval = 0;
-            if (analogRead(IR_RX_PIN[1]) > (IR_Activation)) {
-                Keyboard.addKey(KEYS[1 + 32]);
-                Keyboard.sendKey();
-            } else {
-                Keyboard.delKey(KEYS[1 + 32]);
-                Keyboard.sendKey();
-            }
-            digitalWrite(IR_TX_PIN[1], LOW);
-        case 4:
-            digitalWrite(IR_TX_PIN[2], HIGH);
-            ir_status = 5;
-            break;
-        case 5:
-            ir_status = 6;
-            interval = 0;
-            if (analogRead(IR_RX_PIN[2]) > (IR_Activation)) {
-                Keyboard.addKey(KEYS[2 + 32]);
-                Keyboard.sendKey();
-            } else {
-                Keyboard.delKey(KEYS[2 + 32]);
-                Keyboard.sendKey();
-            }
-            digitalWrite(IR_TX_PIN[2], LOW);
-        case 6:
-            digitalWrite(IR_TX_PIN[3], HIGH);
-            ir_status = 7;
-            break;
-        case 7:
-            ir_status = 8;
-            interval = 0;
-            if (analogRead(IR_RX_PIN[3]) > (IR_Activation)) {
-                Keyboard.addKey(KEYS[3 + 32]);
-                Keyboard.sendKey();
-            } else {
-                Keyboard.delKey(KEYS[3 + 32]);
-                Keyboard.sendKey();
-            }
-            digitalWrite(IR_TX_PIN[3], LOW);
-        case 8:
-            digitalWrite(IR_TX_PIN[4], HIGH);
-            ir_status = 9;
-            break;
-        case 9:
-            ir_status = 10;
-            interval = 0;
-            if (analogRead(IR_RX_PIN[4]) > (IR_Activation)) {
-                Keyboard.addKey(KEYS[4 + 32]);
-                Keyboard.sendKey();
-            } else {
-                Keyboard.delKey(KEYS[4 + 32]);
-                Keyboard.sendKey();
-            }
-            digitalWrite(IR_TX_PIN[4], LOW);
-        case 10:
-            digitalWrite(IR_TX_PIN[5], HIGH);
-            ir_status = 11;
-            break;
-        case 11:
-            ir_status = 0;
-            interval = 0;
-            if (analogRead(IR_RX_PIN[5]) > (IR_Activation)) {
-                Keyboard.addKey(KEYS[5 + 32]);
-                Keyboard.sendKey();
-            } else {
-                Keyboard.delKey(KEYS[5 + 32]);
-                Keyboard.sendKey();
-            }
-            digitalWrite(IR_TX_PIN[5], LOW);
-
-        default:
-            break;
-    }
-}
-*/
-
 bool setKeys(uint8_t keys[]) {
     memcpy(KEYS, keys, 41);
     return 1;
@@ -262,7 +160,6 @@ void sliderSetup() {  // 触摸初始化
         PKEYS[i] = 0;
     }
 }
-
 
 void sliderScan() {  // 触摸扫描
     uint32_t sensors;
@@ -332,101 +229,159 @@ int mapRealKeys(int i) {
     return 0;
 }
 
-void sliderRawScan() {
-    int16_t bl, fl, cal;
+int16_t bl_data[32];
+int32_t bl_loop[32] = {8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192,
+                       8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192,
+                       8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192,
+                       8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192};
+int16_t fl_data[32];
+SimpleKalmanFilter KalmanFilter[32];
+void sliderKalmanScan() {
+    // 扫描触摸
     for (int i=0; i<8; i++) {
-        bl = capA.baselineData(mapRealKeys(i));
-        fl = capA.filteredData(mapRealKeys(i));
-        cal = calTouch(bl, fl);
-
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capA.baselineData(mapRealKeys(i));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capA.filteredData(mapRealKeys(i)));
+    }
+    for (int i=8; i<16; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capB.baselineData(mapRealKeys(i-8));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capB.filteredData(mapRealKeys(i-8)));
+    }
+    for (int i=16; i<24; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capC.baselineData(mapRealKeys(i-16));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capC.filteredData(mapRealKeys(i-16)));
+    }
+    for (int i=24; i<32; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capD.baselineData(mapRealKeys(i-24));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capD.filteredData(mapRealKeys(i-24)));
+    }
+    // 扫描结束
+    
+    // 判断值
+    for (int i=0; i<32; i++) {
+        int cal = calTouch(bl_data[i], fl_data[i]);
         #if SLIDERDEBUG
         DebugSerialDevice.print(cal);
         DebugSerialDevice.print("-");
         #endif
-
         if (cal > (KEYS[40]+20)) {
             Keyboard.addKey(KEYS[i]);
             Keyboard.sendKey();
             FKEYS[i] = true;
             PKEYS[KEYS[i]]++;
+            bl_loop[i] = 0;
         } else if (PKEYS[KEYS[i]] && FKEYS[i]) {
             Keyboard.delKey(KEYS[i]);
             Keyboard.sendKey();
             FKEYS[i] = false;
             PKEYS[KEYS[i]]--;
-        }
-    }
-    for (int i=0; i<8; i++) {
-        bl = capB.baselineData(mapRealKeys(i));
-        fl = capB.filteredData(mapRealKeys(i));
-        cal = calTouch(bl, fl);
-
-        #if SLIDERDEBUG
-        DebugSerialDevice.print(cal);
-        DebugSerialDevice.print("-");
-        #endif
-
-        if (cal > (KEYS[40]+20)) {
-            Keyboard.addKey(KEYS[i+8]);
-            Keyboard.sendKey();
-            FKEYS[i+8] = true;
-            PKEYS[KEYS[i+8]]++;
-        } else if (PKEYS[KEYS[i+8]] && FKEYS[i+8]) {
-            Keyboard.delKey(KEYS[i+8]);
-            Keyboard.sendKey();
-            FKEYS[i+8] = false;
-            PKEYS[KEYS[i+8]]--;
-        }
-    }
-    for (int i=0; i<8; i++) {
-        bl = capC.baselineData(mapRealKeys(i));
-        fl = capC.filteredData(mapRealKeys(i));
-        cal = calTouch(bl, fl);
-
-        #if SLIDERDEBUG
-        DebugSerialDevice.print(cal);
-        DebugSerialDevice.print("-");
-        #endif
-
-        if (cal > (KEYS[40]+20)) {
-            Keyboard.addKey(KEYS[i+16]);
-            Keyboard.sendKey();
-            FKEYS[i+16] = true;
-            PKEYS[KEYS[i+16]]++;
-        } else if (PKEYS[KEYS[i+16]] && FKEYS[i+16]) {
-            Keyboard.delKey(KEYS[i+16]);
-            Keyboard.sendKey();
-            FKEYS[i+16] = false;
-            PKEYS[KEYS[i+16]]--;
-        }
-    }
-    for (int i=0; i<8; i++) {
-        bl = capD.baselineData(mapRealKeys(i));
-        fl = capD.filteredData(mapRealKeys(i));
-        cal = calTouch(bl, fl);
-
-        #if SLIDERDEBUG
-        DebugSerialDevice.print(cal);
-        DebugSerialDevice.print("-");
-        #endif
-
-        if (cal > (KEYS[40]+20)) {
-            Keyboard.addKey(KEYS[i+24]);
-            Keyboard.sendKey();
-            FKEYS[i+24] = true;
-            PKEYS[KEYS[i+24]]++;
-        } else if (PKEYS[KEYS[i+24]] && FKEYS[i+24]) {
-            Keyboard.delKey(KEYS[i+24]);
-            Keyboard.sendKey();
-            FKEYS[i+24] = false;
-            PKEYS[KEYS[i+24]]--;
+            bl_loop[i] = 0;
         }
     }
     #if SLIDERDEBUG
     DebugSerialDevice.println();
     #endif
 
+    /*
+    DebugSerialDevice.print(capA.filteredData(mapRealKeys(0)));
+    DebugSerialDevice.print("-");
+    DebugSerialDevice.print(KalmanFilter[0].updateEstimate(capA.filteredData(mapRealKeys(0))));
+    DebugSerialDevice.println();
+    */
+
 }
+
+#define PSTHRESHOLD 40
+#define RSTHRESHOLD 40
+#define PSLOWTHRESHOLD 50
+#define INITIAL 60
+int lastKeyRaw[32] = {
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+    };
+void sliderScanUpDown() {
+    // 扫描触摸
+    for (int i=0; i<8; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capA.baselineData(mapRealKeys(i));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capA.filteredData(mapRealKeys(i)));
+    }
+    for (int i=8; i<16; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capB.baselineData(mapRealKeys(i-8));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capB.filteredData(mapRealKeys(i-8)));
+    }
+    for (int i=16; i<24; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capC.baselineData(mapRealKeys(i-16));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capC.filteredData(mapRealKeys(i-16)));
+    }
+    for (int i=24; i<32; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capD.baselineData(mapRealKeys(i-24));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = KalmanFilter[i].updateEstimate(capD.filteredData(mapRealKeys(i-24)));
+    }
+    // 扫描结束
+
+    for (int i=0; i<32; i++) {
+        int cal = calTouch(bl_data[i], fl_data[i]);
+        if (cal - lastKeyRaw[i] > PSTHRESHOLD) {
+                Keyboard.addKey(KEYS[i]);
+                Keyboard.sendKey();
+                PKEYS[KEYS[i]]++;
+                FKEYS[i] = true;
+                lastKeyRaw[i] = cal;
+                // DebugSerialDevice.println(lastKeyRaw[i]);
+            }
+        if (cal - lastKeyRaw[i] < -RSTHRESHOLD) {
+            lastKeyRaw[i] = cal;
+            // DebugSerialDevice.println(lastKeyRaw[i]);
+            if (PKEYS[KEYS[i]]) {
+                Keyboard.delKey(KEYS[i]);
+                Keyboard.sendKey();
+                PKEYS[KEYS[i]]--;
+                FKEYS[i] = false;
+                lastKeyRaw[i] = cal;
+            }
+        }
+        if (cal < PSLOWTHRESHOLD && cal - lastKeyRaw[i] < -5) {
+            Keyboard.delKey(KEYS[i]);
+            Keyboard.sendKey();
+            PKEYS[KEYS[i]]--;
+            FKEYS[i] = false;
+        }
+    }
+}
+
 
 void ChangeMode(int i) {    // 1手套 2空手
     if (i == 1) {
