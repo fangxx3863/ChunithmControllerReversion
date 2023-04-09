@@ -336,7 +336,7 @@ size_t USBHIDKeyboard::delKey(uint8_t k) {
             }
             Serial.println();
             */
-            return 1;
+            // return 1;
         }
     }
     return 0;

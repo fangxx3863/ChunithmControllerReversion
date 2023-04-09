@@ -18,7 +18,7 @@
 // 空手模式
 #define PressThresholds 0                // 按下触发阈值
 #define ReleaseThresholds 0              // 释放触发阈值
-#define MPR121_CHARGE_CURRENT 0x01       // 极板充电电流,设置越高灵敏度越高
+#define MPR121_CHARGE_CURRENT 0x1F       // 极板充电电流,设置越高灵敏度越高
 #define MPR121_ENCODING_PERIOD 0x20      // 极板编码时间,具体设置见MPR121手册
 
 // 手套模式

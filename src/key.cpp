@@ -229,13 +229,88 @@ int mapRealKeys(int i) {
     return 0;
 }
 
+
+#define PSTHRESHOLD 180
+#define RSTHRESHOLD 180
+#define PSLOWTHRESHOLD 50
+#define INITIAL 0
+int lastKeyRaw[32] = {
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
+        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,};
 int16_t bl_data[32];
+int16_t bl_improve[32];
 int32_t bl_loop[32] = {8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192,
                        8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192,
                        8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192,
                        8192, 8192, 8192, 8192, 8192, 8192, 8192, 8192};
+                       
 int16_t fl_data[32];
 SimpleKalmanFilter KalmanFilter[32];
+void sliderRawScan() {
+    // 扫描触摸
+    for (int i=0; i<8; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capA.baselineData(mapRealKeys(i));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = capA.filteredData(mapRealKeys(i));
+    }
+    for (int i=8; i<16; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capB.baselineData(mapRealKeys(i-8));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = capB.filteredData(mapRealKeys(i-8));
+    }
+    for (int i=16; i<24; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capC.baselineData(mapRealKeys(i-16));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = capC.filteredData(mapRealKeys(i-16));
+    }
+    for (int i=24; i<32; i++) {
+        bl_loop[i]++;
+        if (bl_loop[i] > 1024) {
+            bl_data[i] = capD.baselineData(mapRealKeys(i-24));
+            bl_loop[i] = 0;
+        }
+        fl_data[i] = capD.filteredData(mapRealKeys(i-24));
+    }
+    // 扫描结束
+    
+    // 判断值
+    for (int i=0; i<32; i++) {
+        int cal = calTouch(bl_data[i], fl_data[i]);
+        #if SLIDERDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
+        if (cal > (KEYS[40]+20)) {
+            Keyboard.addKey(KEYS[i]);
+            Keyboard.sendKey();
+            FKEYS[i] = true;
+            PKEYS[KEYS[i]]++;
+            bl_loop[i] = 0;
+        } else if (PKEYS[KEYS[i]] && FKEYS[i]) {
+            Keyboard.delKey(KEYS[i]);
+            Keyboard.sendKey();
+            FKEYS[i] = false;
+            PKEYS[KEYS[i]]--;
+            bl_loop[i] = 0;
+        }
+    }
+    #if SLIDERDEBUG
+    DebugSerialDevice.println();
+    #endif
+
+}
+
 void sliderKalmanScan() {
     // 扫描触摸
     for (int i=0; i<8; i++) {
@@ -306,16 +381,79 @@ void sliderKalmanScan() {
 
 }
 
-#define PSTHRESHOLD 40
-#define RSTHRESHOLD 40
-#define PSLOWTHRESHOLD 50
-#define INITIAL 60
-int lastKeyRaw[32] = {
-        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
-        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
-        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
-        INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL,
-    };
+void sliderImproveKalmanScan() {
+    // 扫描触摸
+    for (int i=0; i<8; i++) {
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
+        fl_data[i] = (int)KalmanFilter[i].updateEstimate(capA.filteredData(mapRealKeys(i)));
+        bl_loop[i]++;
+        if (bl_loop[i] > 10 && !FKEYS[i]) {
+            bl_improve[i] = fl_data[i];
+            bl_loop[i] = 0;
+        }
+        if (calTouch(bl_improve[i], fl_data[i]) < -10) bl_improve[i] = fl_data[i];
+    }
+    for (int i=8; i<16; i++) {
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
+        fl_data[i] = (int)KalmanFilter[i].updateEstimate(capB.filteredData(mapRealKeys(i-8)));
+        bl_loop[i]++;
+        if (bl_loop[i] > 10 && !FKEYS[i]) {
+            bl_improve[i] = fl_data[i];
+            bl_loop[i] = 0;
+        }
+        if (calTouch(bl_improve[i], fl_data[i]) < -10) bl_improve[i] = fl_data[i];
+    }
+    for (int i=16; i<24; i++) {
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
+        fl_data[i] = (int)KalmanFilter[i].updateEstimate(capC.filteredData(mapRealKeys(i-16)));
+        bl_loop[i]++;
+        if (bl_loop[i] > 10 && !FKEYS[i]) {
+            bl_improve[i] = fl_data[i];
+            bl_loop[i] = 0;
+        }
+        if (calTouch(bl_improve[i], fl_data[i]) < -10) bl_improve[i] = fl_data[i];
+    }
+    for (int i=24; i<32; i++) {
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
+        fl_data[i] = (int)KalmanFilter[i].updateEstimate(capD.filteredData(mapRealKeys(i-24)));
+        bl_loop[i]++;
+        if (bl_loop[i] > 10 && !FKEYS[i]) {
+            bl_improve[i] = fl_data[i];
+            bl_loop[i] = 0;
+        }
+        if (calTouch(bl_improve[i], fl_data[i]) < -10) bl_improve[i] = fl_data[i];
+    }
+    // 扫描结束
+    
+    // 判断值
+    for (int i=0; i<32; i++) {
+        int cal = calTouch(bl_improve[i], fl_data[i]);
+        #if SLIDERDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
+        if (cal - lastKeyRaw[i] > PSTHRESHOLD || cal > 200) lastKeyRaw[i] = cal;
+        if (cal > (KEYS[40]+20) && !FKEYS[i]) {
+            Keyboard.addKey(KEYS[i]);
+            Keyboard.sendKey();
+            FKEYS[i] = true;
+            PKEYS[KEYS[i]]++;
+            bl_loop[i] = 0;
+        }
+        if ((cal < (KEYS[40]+20) && PKEYS[KEYS[i]]) || (cal - lastKeyRaw[i] < -RSTHRESHOLD)) {
+            Keyboard.delKey(KEYS[i]);
+            Keyboard.sendKey();
+            FKEYS[i] = false;
+            PKEYS[KEYS[i]]--;
+            lastKeyRaw[i] = cal;
+        }
+
+    }
+    #if SLIDERDEBUG
+    DebugSerialDevice.println();
+    #endif
+}
+
 void sliderScanUpDown() {
     // 扫描触摸
     for (int i=0; i<8; i++) {

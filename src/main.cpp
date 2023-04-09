@@ -26,8 +26,9 @@ void loop() {
         KeyCheck();
     }
     if (isSliderOpen()) {
-        sliderKalmanScan();     // 读MPR121原始值单片机卡尔曼滤波处理
-        // sliderScanUpDown();  // 读MPR121原始值通过上升下降检测处理
+        // sliderKalmanScan();       // 读MPR121原始值单片机卡尔曼滤波处理
+        sliderImproveKalmanScan();   // 读MPR121原始值单片机改进BaseLine的卡尔曼滤波处理
+        // sliderScanUpDown();       // 读MPR121原始值通过上升下降检测处理
     }
     setKeysMap();
     // KeyTest();
