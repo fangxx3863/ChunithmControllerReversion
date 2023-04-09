@@ -230,7 +230,7 @@ int mapRealKeys(int i) {
 }
 
 
-#define PSTHRESHOLD 180
+#define PSTHRESHOLD 10
 #define RSTHRESHOLD 180
 #define PSLOWTHRESHOLD 50
 #define INITIAL 0
@@ -432,7 +432,7 @@ void sliderImproveKalmanScan() {
         DebugSerialDevice.print(cal);
         DebugSerialDevice.print("-");
         #endif
-        if (cal - lastKeyRaw[i] > PSTHRESHOLD || cal > 200) lastKeyRaw[i] = cal;
+        if (cal - lastKeyRaw[i] > PSTHRESHOLD) lastKeyRaw[i] = cal;
         if (cal > (KEYS[40]+20) && !FKEYS[i]) {
             Keyboard.addKey(KEYS[i]);
             Keyboard.sendKey();
