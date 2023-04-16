@@ -11,7 +11,8 @@ void setup() {
     VendorSetup();
     KeySetup();
     sliderSetup();
-    IRAutoSetup();
+    // IRAutoSetup();
+    IRSetup();
     readEEPROM();
     Wire.setClock(3400000);
     USB.PID(0x8222);
@@ -23,7 +24,8 @@ void setup() {
 
 void loop() {
     if (isIROpen()) {
-        KeyCheck();
+        // KeyCheck();
+        IRImproveCheck();
     }
     if (isSliderOpen()) {
         // sliderKalmanScan();       // 读MPR121原始值单片机卡尔曼滤波处理

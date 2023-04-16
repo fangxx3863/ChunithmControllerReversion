@@ -53,6 +53,12 @@ void IRAutoSetup() {  // 检测环境红外强度设置触发阈值
     DebugSerialDevice.println("[INFO] IR Auto Setup OK");
 }
 
+void IRSetup() {
+    for (int i = 0; i < 6; i++) {
+        pinMode(IR_RX_PIN[i], INPUT);
+    }
+}
+
 bool isIROpen() {
     if (KEYS[38] == 'y') {
         return 1;
@@ -101,6 +107,97 @@ void KeyCheck() {  // AIR检查旧代码
             }
         }
         digitalWrite(IR_TX_PIN[i], LOW);
+    }
+}
+
+#define EstimateError 5
+#define MeasurementError 5
+#define ProcessNoise 0.01
+SimpleKalmanFilter IRKalman[6] = {
+    {MeasurementError, EstimateError, ProcessNoise},
+    {MeasurementError, EstimateError, ProcessNoise},
+    {MeasurementError, EstimateError, ProcessNoise},
+    {MeasurementError, EstimateError, ProcessNoise},
+    {MeasurementError, EstimateError, ProcessNoise},
+    {MeasurementError, EstimateError, ProcessNoise},
+};
+#define INITIRDATA 8192
+int IR_data[6];
+int IR_raw_data[6];
+int IR_bl[6];
+int IR_bl_loop[6];
+int IR_last_data[6] = {
+    INITIRDATA, INITIRDATA, INITIRDATA, INITIRDATA, INITIRDATA, INITIRDATA
+};
+// bool FIR[6] = {1,1,1,1,1,1};
+void IRImproveCheck() {
+    /*
+    for (int i=0; i<6; i++) {
+        if (calTouch(IR_bl[i], IR_raw_data[i]) - IR_last_data[i] < -IR_UPDOWN) IR_bl[i] = IR_raw_data[i];
+        digitalWrite(IR_TX_PIN[i], HIGH);
+        IR_raw_data[i] = analogRead(IR_RX_PIN[i]);
+        IR_data[i] = (int)IRKalman[i].updateEstimate(IR_raw_data[i]);
+        digitalWrite(IR_TX_PIN[i], LOW);
+        IR_bl_loop[i]++;
+        if (IR_bl_loop[i] > 3 && !FIR[i]) {
+            IR_bl[i] = IR_raw_data[i];
+            IR_bl_loop[i] = 0;
+        }
+        if (calTouch(IR_bl[i], IR_raw_data[i]) < -20) IR_bl[i] = IR_raw_data[i];
+    }
+    for (int i=0; i<6; i++) {
+        int cal = calTouch(IR_bl[i], IR_raw_data[i]);
+        #if IRDEBUG
+        DebugSerialDevice.print(cal);
+        DebugSerialDevice.print("-");
+        #endif
+        if (cal - IR_last_data[i] > IR_UPDOWN) IR_last_data[i] = cal;
+        if (cal > IR_ACTIVATION && !FIR[i]) {
+            Keyboard.addKey(KEYS[i+32]);
+            Keyboard.sendKey();
+            FIR[i] = true;
+            IR_bl_loop[i] = 0;
+        }
+        if ((cal < IR_ACTIVATION && FIR[i]) || (cal - IR_last_data[i] < -IR_UPDOWN)) {
+            Keyboard.delKey(KEYS[i+32]);
+            Keyboard.sendKey();
+            FIR[i] = false;
+            IR_last_data[i] = cal;
+        }
+        if (cal - IR_last_data[i] < -IR_UPDOWN) IR_last_data[i] = cal;
+
+    }
+    #if IRDEBUG
+    DebugSerialDevice.println();
+    #endif
+    */
+    for (int i=0; i<6; i++) {
+        digitalWrite(IR_TX_PIN[i], HIGH);
+        // IR_raw_data[i] = analogRead(IR_RX_PIN[i]);
+        IR_data[i] = (int)IRKalman[i].updateEstimate(analogRead(IR_RX_PIN[i]));
+        digitalWrite(IR_TX_PIN[i], LOW);
+        #if IRDEBUG
+        DebugSerialDevice.print(IR_data[i]);
+        DebugSerialDevice.print("-");
+        #endif
+    }
+    #if IRDEBUG
+    DebugSerialDevice.println();
+    #endif
+    // DebugSerialDevice.print(IR_raw_data[0]);
+    // DebugSerialDevice.print("-");
+    // DebugSerialDevice.println(IR_data[0]);
+    for (int i=0; i<6; i++) {
+        if (IR_data[i] - IR_last_data[i] > IR_ACTIVATION) {
+            Keyboard.addKey(KEYS[i+32]);
+            Keyboard.sendKey();
+            IR_last_data[i] = IR_data[i];
+        }
+        if (IR_data[i] - IR_last_data[i] < -IR_ACTIVATION) {
+            Keyboard.delKey(KEYS[i+32]);
+            Keyboard.sendKey();
+            IR_last_data[i] = IR_data[i];
+        }
     }
 }
 
@@ -231,7 +328,7 @@ int mapRealKeys(int i) {
 
 
 #define PSTHRESHOLD 3
-#define RSTHRESHOLD 140
+#define RSTHRESHOLD 160
 #define PSLOWTHRESHOLD 50
 #define INITIAL 0
 int lastKeyRaw[32] = {
@@ -385,60 +482,40 @@ void sliderKalmanScan() {
 void sliderImproveKalmanScan() {
     // 扫描触摸
     for (int i=0; i<8; i++) {
-        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) small_down_scan[i] = true;
-        if ((calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -3) && small_down_scan[i]) {
-            bl_improve[i] = fl_data[i];
-        }else {
-            small_down_scan[i] = false;
-        }
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
         fl_data[i] = (int)KalmanFilter[i].updateEstimate(capA.filteredData(mapRealKeys(i)));
         bl_loop[i]++;
-        if (bl_loop[i] > 10 && !FKEYS[i]) {
+        if (bl_loop[i] > 3 && !FKEYS[i]) {
             bl_improve[i] = fl_data[i];
             bl_loop[i] = 0;
         }
         if (calTouch(bl_improve[i], fl_data[i]) < -5) bl_improve[i] = fl_data[i];
     }
     for (int i=8; i<16; i++) {
-        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) small_down_scan[i] = true;
-        if ((calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -3) && small_down_scan[i]) {
-            bl_improve[i] = fl_data[i];
-        }else {
-            small_down_scan[i] = false;
-        }
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
         fl_data[i] = (int)KalmanFilter[i].updateEstimate(capB.filteredData(mapRealKeys(i-8)));
         bl_loop[i]++;
-        if (bl_loop[i] > 10 && !FKEYS[i]) {
+        if (bl_loop[i] > 3 && !FKEYS[i]) {
             bl_improve[i] = fl_data[i];
             bl_loop[i] = 0;
         }
         if (calTouch(bl_improve[i], fl_data[i]) < -5) bl_improve[i] = fl_data[i];
     }
     for (int i=16; i<24; i++) {
-        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) small_down_scan[i] = true;
-        if ((calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -3) && small_down_scan[i]) {
-            bl_improve[i] = fl_data[i];
-        }else {
-            small_down_scan[i] = false;
-        }
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
         fl_data[i] = (int)KalmanFilter[i].updateEstimate(capC.filteredData(mapRealKeys(i-16)));
         bl_loop[i]++;
-        if (bl_loop[i] > 10 && !FKEYS[i]) {
+        if (bl_loop[i] > 3 && !FKEYS[i]) {
             bl_improve[i] = fl_data[i];
             bl_loop[i] = 0;
         }
         if (calTouch(bl_improve[i], fl_data[i]) < -5) bl_improve[i] = fl_data[i];
     }
     for (int i=24; i<32; i++) {
-        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) small_down_scan[i] = true;
-        if ((calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -3) && small_down_scan[i]) {
-            bl_improve[i] = fl_data[i];
-        }else {
-            small_down_scan[i] = false;
-        }
+        if (calTouch(bl_improve[i], fl_data[i]) - lastKeyRaw[i] < -RSTHRESHOLD) bl_improve[i] = fl_data[i];
         fl_data[i] = (int)KalmanFilter[i].updateEstimate(capD.filteredData(mapRealKeys(i-24)));
         bl_loop[i]++;
-        if (bl_loop[i] > 10 && !FKEYS[i]) {
+        if (bl_loop[i] > 3 && !FKEYS[i]) {
             bl_improve[i] = fl_data[i];
             bl_loop[i] = 0;
         }
